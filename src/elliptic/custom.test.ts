@@ -50,36 +50,55 @@ test.skip('ethereum address', () => {
   }))
 })
 
-test('createAddress', () => {
-  const arb = fc.bigInt({ min: 1n, max: maxPrivateKey });
-  fc.sample(arb, 5).forEach((n) => {
-    const customReuslt = ethereumAddressFromPrivKey(Buffer.from(n.toString(16).padStart(64, '0'), 'hex'))
-    const wallet = new Wallet('0x' + n.toString(16).padStart(64, '0'))
-    const libResult = wallet.address
 
-    expect(customReuslt).toEqual(libResult.toLowerCase())
-  })
-})
+test('createAddress', () => {
+  fc.assert(
+    fc.property(
+      fc.bigInt({ min: 1n, max: maxPrivateKey }),
+      (n) => {
+        const hex = n.toString(16).padStart(64, '0');
+        const privBuf = Buffer.from(hex, 'hex');
+
+        const customResult = ethereumAddressFromPrivKey(privBuf);
+        const wallet = new Wallet('0x' + hex);
+        const libResult = wallet.address;
+
+        expect(customResult).toEqual(libResult.toLowerCase());
+      }
+    )
+  );
+});
+
 
 test('compare multiplyPointNTimes to library', () => {
-  const arb = fc.bigInt({ min: 1n, max: 2n ** 256n });
-  fc.sample(arb, 5).forEach((n) => {
-    const customResult = multiplyPointNTimes(n, G)
-    const libReusult = multiplyGNTimesEc(n)
+  fc.assert(
+    fc.property(
+      fc.bigInt({ min: 1n, max: 2n ** 256n - 1n }), // ← max は inclusive なので -1n
+      (n) => {
+        const customResult = multiplyPointNTimes(n, G);
+        const libResult = multiplyGNTimesEc(n);
 
-    expect(customResult).toEqual(libReusult)
-  });
+        expect(customResult).toEqual(libResult);
+      }
+    )
+  );
 })
 
 test('compare createPublicKey to library', () => {
-  const arb = fc.bigInt({ min: 1n, max: maxPrivateKey });
-  fc.sample(arb, 5).forEach((n) => {
-    const privBuf = hexToUint8Array(n.toString(16).padStart(64, '0'))
-    const P1 = createPublicKey(privBuf, true);
-    const P2 = secp256k1.publicKeyCreate(privBuf, true)
+  fc.assert(
+    fc.property(
+      fc.bigInt({ min: 1n, max: maxPrivateKey - 1n }),
+      (n) => {
+        const hex = n.toString(16).padStart(64, '0');
+        const privBuf = hexToUint8Array(hex);
 
-    expect(P1).toEqual(P2)
-  });
+        const P1 = createPublicKey(privBuf, true);
+        const P2 = secp256k1.publicKeyCreate(privBuf, true);
 
-})
+        expect(P1).toEqual(P2);
+      }
+    )
+  );
+});
+
 
