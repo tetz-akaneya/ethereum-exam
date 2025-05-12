@@ -1,6 +1,7 @@
 import { parseEther, parseUnits, TransactionRequest, toBeArray } from "ethers";
 import { decodeTx } from "./decodeTx";
 import { sign } from "./sign";
+import fc from 'fast-check'
 
 // トランザクションデータ（オンライン側から取得し、オフラインに持ち込む）
 const testTxData: TransactionRequest = {
@@ -24,11 +25,6 @@ const testTxData: TransactionRequest = {
 
 const testPrivKey = '0xebce77fe4c7df7c3795e6a51b37d5d6ebf21c844d0ed4da8861b0fa7f48f0d1a'
 
-test('arrayify', () => {
-  console.log(
-    toBeArray("0xffa0")
-  )
-})
 test('signs without error', async () => {
   const signedTx = await sign({
     txData: testTxData,
