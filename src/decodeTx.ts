@@ -6,15 +6,6 @@ export const decodeTx = (rawTx: string) => {
     return null;
   }
 
-  decoded.data
-  decoded.from
-  decoded.to
-  decoded.gasLimit
-  decoded.gasPrice
-  decoded.type
-
-  console.log(JSON.stringify(decoded))
-
   return {
     from: decoded.from,
     to: decoded.to,

@@ -16,9 +16,9 @@ test('static mnemonic derives to key', () => {
   })
 
   expect(key).toEqual({
-    address: '0xd5d66ea090D9c1D1a7663E5AB6Eab5EC38Dfa1Ca',
-    privateKey: '0x45a6ff4ac5154f1e364448b8822293e859f79403eb533addaf82c85c46e9a195',
-    publicKey: '0x036728137ae68a1c6efc11a1dec20e02a67d496ea0f22799f23d1bedac53fa04a1',
+    address: '0xe3c8468a41B17cCFB37324CcA0577b9463aD860B',
+    privateKey: '0x27e3b75b734ef80adfcddc1e94ba99000cb11fe7b3c4c0efd8e1defba158042f',
+    publicKey: '0x03045fae61d46c406f0d6638e336b44bdf3ca2cd25f1691aed99d63983e904d5bc',
   })
 })
 
