@@ -32,7 +32,7 @@ function uint8ArrayToHex(arrayBuffer: Uint8Array) {
 }
 
 // Hex 文字列からUint8Arrayに変換
-function hexToUint8Array(hex: string): Uint8Array {
+export function hexToUint8Array(hex: string): Uint8Array {
   // remove 0x prefix if present
   if (hex.startsWith('0x')) {
     hex = hex.slice(2);
@@ -51,6 +51,7 @@ function hexToUint8Array(hex: string): Uint8Array {
   for (let i = 0; i < len; i++) {
     u8[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
   }
+
   return u8;
 }
 /**
@@ -97,7 +98,7 @@ export function pointAdd(P: Point, Q: Point): Point {
 /**
  * scalarMult: 楕円曲線上の点 G にスカラー k を掛ける（k·G）
  */
-export function scalarMult(k: bigint, G: Point): Point {
+export function multiplyPointNTimes(k: bigint, G: Point): Point {
   let R: Point | null = null;
   let addend = G;
 
@@ -129,11 +130,11 @@ export const deriveHardened = (
   const data = Buffer.concat([Buffer.from([0x00]), privKey, indexBuffer]);
 
   const I = createHmac('sha512', chainCode).update(data).digest();
-  const IL = I.subarray(0, 32);
+  const ILbn = inModP(BigInt('0x' + I.subarray(0, 32).toString('hex')) + BigInt('0x' + privKey.toString('hex')), modP);
   const IR = I.subarray(32);
 
   return {
-    key: IL,
+    key: Buffer.from(ILbn.toString(16).padStart(64, '0'), 'hex'),
     chainCode: IR
   };
 }
@@ -164,23 +165,31 @@ export const deriveNormal = (
 export const ethereumAddressFromPrivKey = (
   privKey: Buffer
 ): string => {
-  const pubKey = createPublicKey(privKey, true).subarray(1); // 65バイト中、先頭1バイトを除去
-  const address = ethers.keccak256(pubKey).slice(-20); // 下位20バイト
-  return '0x' + Buffer.from(address).toString('hex');
+  // 非圧縮形式であることに注意
+  const pubKey = createPublicKey(privKey, false).subarray(1); // 65バイト中、先頭1バイトを除去
+  const address = ethers.keccak256(pubKey).slice(-40); // 下位20バイト
+  return '0x' + address
 }
 
+export const maxPrivateKey = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141n
 export function createPublicKey(privateKey: Uint8Array, compressed: boolean = true) {
   let publicKey: string;
-  const P = scalarMult(BigInt('0x' + uint8ArrayToHex(privateKey)), G)
+  const privateKeyBignum = BigInt('0x' + uint8ArrayToHex(privateKey))
+  if (privateKeyBignum >= maxPrivateKey) {
+    return new Uint8Array()
+  }
+
+  const PublicKeyPoint = multiplyPointNTimes(BigInt('0x' + uint8ArrayToHex(privateKey)), G)
 
   if (compressed) {
-    const isYEven = P[1] % 2n === 0n
+    const isYEven = PublicKeyPoint[1] % 2n === 0n
     const dynamicPrefix = isYEven ? '02' : '03'
-    publicKey = `${dynamicPrefix}${P[0].toString(16).padStart(64, '0')}`
+    publicKey = `${dynamicPrefix}${PublicKeyPoint[0].toString(16).padStart(64, '0')}`
   } else {
     const staticPrefix = '04'
-    publicKey = `${staticPrefix}${P[0].toString(16).padStart(64, '0')}${P[1].toString(16).padStart(64, '0')}`
+    publicKey = `${staticPrefix}${PublicKeyPoint[0].toString(16).padStart(64, '0')}${PublicKeyPoint[1].toString(16).padStart(64, '0')}`
   }
 
   return hexToUint8Array(publicKey)
 }
+
