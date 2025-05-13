@@ -1,20 +1,12 @@
 import { ethers, Wallet } from 'ethers';
 import * as fc from 'fast-check';
 import {
-  bigintToHex,
-  bufferToHex,
   selfmadeCKDpriv,
   createMasterKeyBip32,
   createPublicKey,
-  CURVE_ORDER,
   ethereumAddressFromPrivKey,
-  G,
-  HARDENED_OFFSET,
-  hexToBuffer,
-  hexToUint8Array,
-  multiplyPointNTimes,
   selfmadeDeriveKey,
-} from './selfmade';
+} from './hdwallet';
 import { multiplyGNTimesEc } from './test/libraryImp';
 
 import {
@@ -24,6 +16,14 @@ import {
   purposeDict,
   typedKeys,
 } from '../generateHdKey';
+import {
+  hexToBuffer,
+  bufferToHex,
+  bigintToHex,
+  hexToUint8Array,
+  multiplyPointNTimes,
+} from './convert';
+import { HARDENED_OFFSET, CURVE_ORDER, G } from './constant';
 
 // 型がないからか、importができなかったのでrequire
 const secp256k1 = require('secp256k1');
@@ -37,7 +37,7 @@ describe('createMasterKeyBip32', () => {
 
     // buffer での比較が不慣れだったので文字列にして比較
     expect(bufferToHex(actual.key, true)).toEqual(wallet.privateKey);
-    expect(bufferToHex(actual.chainCode, true)).toEqual(wallet.chainCode)
+    expect(bufferToHex(actual.chainCode, true)).toEqual(wallet.chainCode);
   });
 });
 
@@ -119,7 +119,7 @@ describe('createAddress', () => {
       }),
     );
   });
-})
+});
 
 describe('multiplyPointNTimes', () => {
   it('works same as library', () => {
@@ -151,4 +151,4 @@ describe('createPublicKey', () => {
       }),
     );
   });
-})
+});

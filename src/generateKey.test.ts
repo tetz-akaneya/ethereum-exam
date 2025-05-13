@@ -78,4 +78,3 @@ test('genPath generates correct BIP44 path format', () => {
 test('createMnemonic example', () => {
   expect(createMnemonic({ byteSize: 32 }).split(' ').length).toEqual(24);
 });
-
