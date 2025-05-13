@@ -32,10 +32,13 @@ describe('Conversion functions', () => {
   describe('bigintToInt', () => {
     it('should convert safe BigInt to number correctly', () => {
       fc.assert(
-        fc.property(fc.integer({ min: 0, max: Number.MAX_SAFE_INTEGER }), (n) => {
-          const b = BigInt(n);
-          expect(bigintToInt(b)).toBe(n);
-        }),
+        fc.property(
+          fc.integer({ min: 0, max: Number.MAX_SAFE_INTEGER }),
+          (n) => {
+            const b = BigInt(n);
+            expect(bigintToInt(b)).toBe(n);
+          },
+        ),
       );
     });
   });
@@ -107,7 +110,7 @@ describe('Conversion functions', () => {
           const buf = uint8ArrayToBuffer(arr);
           const restored = bufferToUint8Array(buf);
           expect([...restored]).toEqual([...arr]);
-        })
+        }),
       );
     });
   });
@@ -119,7 +122,7 @@ describe('Conversion functions', () => {
           const hex = bigintToHex(bn, undefined, true); // 0x-prefixed
           const parsed = hexToBigInt(hex);
           expect(parsed).toBe(bn);
-        })
+        }),
       );
     });
   });
@@ -127,10 +130,13 @@ describe('Conversion functions', () => {
   describe('intToBigInt', () => {
     it('should match BigInt(n) for integers', () => {
       fc.assert(
-        fc.property(fc.integer({ min: 0, max: Number.MAX_SAFE_INTEGER }), (n) => {
-          const result = intToBigInt(n);
-          expect(result).toBe(BigInt(n));
-        })
+        fc.property(
+          fc.integer({ min: 0, max: Number.MAX_SAFE_INTEGER }),
+          (n) => {
+            const result = intToBigInt(n);
+            expect(result).toBe(BigInt(n));
+          },
+        ),
       );
     });
   });
@@ -142,7 +148,7 @@ describe('Conversion functions', () => {
           const buf = intToBuffer(n, 4);
           const result = bufferToInt(buf);
           expect(result).toBe(n);
-        })
+        }),
       );
     });
   });

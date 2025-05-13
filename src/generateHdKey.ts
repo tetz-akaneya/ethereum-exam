@@ -42,7 +42,11 @@ export const genBipTypicalPath = (arg: {
 };
 
 // ニーモニック、パスフレーズからHDウォレットができるので、任意のpathのアドレスを導出する。
-export const deriveKey = (arg: { mnemonicString: string; passphrase: string; path: string }) => {
+export const deriveKey = (arg: {
+  mnemonicString: string;
+  passphrase: string;
+  path: string;
+}) => {
   const mnemonic = Mnemonic.fromPhrase(arg.mnemonicString, arg.passphrase);
 
   const seed = mnemonic.computeSeed();

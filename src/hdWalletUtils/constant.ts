@@ -5,7 +5,8 @@
 export const modP = 2n ** 256n - 2n ** 32n - 977n;
 
 // 秘密鍵の上限値
-export const CURVE_ORDER = 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141n;
+export const CURVE_ORDER =
+  0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141n;
 
 export const HARDENED_OFFSET = 2 ** 31;
 export type Point = [bigint, bigint];

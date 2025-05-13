@@ -26,7 +26,11 @@ export const createMasterKeyBip32 = (seed: Buffer) => {
 /*
  * BIP32 のCKDPriv関数実装
  */
-export const selfmadeCKDpriv = (privKey: Buffer, chainCode: Buffer, index: number) => {
+export const selfmadeCKDpriv = (
+  privKey: Buffer,
+  chainCode: Buffer,
+  index: number,
+) => {
   const indexBuffer = intToBuffer(index, 4);
   let data: Buffer;
   if (HARDENED_OFFSET <= index) {
@@ -38,10 +42,14 @@ export const selfmadeCKDpriv = (privKey: Buffer, chainCode: Buffer, index: numbe
   const I = createHmac('sha512', chainCode).update(data).digest();
   const IL = I.subarray(0, 32);
   const IR = I.subarray(32);
-  const childKeyBn = toBigintModP(bufferToBigInt(IL) + bufferToBigInt(privKey), CURVE_ORDER);
+  const childKeyBn = toBigintModP(
+    bufferToBigInt(IL) + bufferToBigInt(privKey),
+    CURVE_ORDER,
+  );
 
   if (childKeyBn === 0n) throw new Error('Derived key is invalid (zero)');
-  if (modP < bufferToBigInt(IL)) throw new Error('Derived key is invalid (larger than modP)');
+  if (modP < bufferToBigInt(IL))
+    throw new Error('Derived key is invalid (larger than modP)');
 
   return {
     key: bigintToBuffer(childKeyBn, 32),
@@ -57,13 +65,19 @@ export const ethereumAddressFromPrivKey = (privKey: Buffer): string => {
   return '0x' + address;
 };
 
-export const createPublicKey = (privateKey: Uint8Array, compressed: boolean = true) => {
+export const createPublicKey = (
+  privateKey: Uint8Array,
+  compressed: boolean = true,
+) => {
   const privateKeyBignum = hexToBigInt(uint8ArrayToHex(privateKey));
   if (privateKeyBignum >= CURVE_ORDER) {
     return new Uint8Array();
   }
 
-  const PublicKeyPoint = multiplyPointNTimes(BigInt('0x' + uint8ArrayToHex(privateKey)), G);
+  const PublicKeyPoint = multiplyPointNTimes(
+    BigInt('0x' + uint8ArrayToHex(privateKey)),
+    G,
+  );
   const publicKey = serializePoint(PublicKeyPoint, compressed);
 
   return hexToUint8Array(publicKey);
@@ -102,7 +116,11 @@ export const parseDerivationPath = (path: string): number[] => {
     });
 };
 
-export const selfmadeDeriveKey = (arg: { seed: Buffer; passphrase: string; path: string }) => {
+export const selfmadeDeriveKey = (arg: {
+  seed: Buffer;
+  passphrase: string;
+  path: string;
+}) => {
   const parsedPath = parseDerivationPath(arg.path);
   const I = createMasterKeyBip32(arg.seed);
 

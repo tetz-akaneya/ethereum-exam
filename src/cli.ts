@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
 import { deriveKey } from './generateHdKey.js';
-import { readFileSync } from 'fs'
-import path from 'path'
+import { readFileSync } from 'fs';
+import path from 'path';
 
 const program = new Command();
 
@@ -24,20 +24,16 @@ program
   .description('derives addresses from private key and paths')
   .option('-c, --config <path>', 'Path to config file')
   .action((options) => {
-    options.config ||= 'secret_params.json'
-    console.log(33)
-    const json = JSON.parse(readFileSync(path.resolve(options.config), 'utf8'))
-    console.log(json)
-    return
+    options.config ||= 'secret_params.json';
+    const json = JSON.parse(readFileSync(path.resolve(options.config), 'utf8'));
     const key = deriveKey({
       mnemonicString: json.mnemonic,
       passphrase: json.passphrase,
       path: json.derivePath,
-    })
+    });
 
-    console.log(`Address: ${key.address}`)
-    console.log(`Private Key: ${key.privateKey}`)
-  })
+    console.log(`Address: ${key.address}`);
+    console.log(`Private Key: ${key.privateKey}`);
+  });
 
 program.parse();
-

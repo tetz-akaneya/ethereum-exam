@@ -27,8 +27,10 @@ test('static mnemonic derives to key', () => {
 
   expect(key).toEqual({
     address: '0xe3c8468a41B17cCFB37324CcA0577b9463aD860B',
-    privateKey: '0x27e3b75b734ef80adfcddc1e94ba99000cb11fe7b3c4c0efd8e1defba158042f',
-    publicKey: '0x03045fae61d46c406f0d6638e336b44bdf3ca2cd25f1691aed99d63983e904d5bc',
+    privateKey:
+      '0x27e3b75b734ef80adfcddc1e94ba99000cb11fe7b3c4c0efd8e1defba158042f',
+    publicKey:
+      '0x03045fae61d46c406f0d6638e336b44bdf3ca2cd25f1691aed99d63983e904d5bc',
   });
 });
 

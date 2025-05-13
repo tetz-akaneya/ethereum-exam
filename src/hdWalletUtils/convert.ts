@@ -62,7 +62,8 @@ export const bufferToHex = (buffer: Buffer, prefix = false): string =>
 /**
  * Buffer → bigint（BE解釈）
  */
-export const bufferToBigInt = (buffer: Buffer): bigint => BigInt('0x' + buffer.toString('hex'));
+export const bufferToBigInt = (buffer: Buffer): bigint =>
+  BigInt('0x' + buffer.toString('hex'));
 
 /**
  * number → Buffer（BE, 固定長, 最大4byte）
@@ -93,11 +94,18 @@ export const bigintToBuffer = (n: bigint, byteSize: number): Buffer => {
 /**
  * bigint → Hex文字列（プレフィックス/ゼロ埋めあり）
  */
-export const bigintToHex = (n: bigint, byteLength?: number, prefix = false): string => {
+export const bigintToHex = (
+  n: bigint,
+  byteLength?: number,
+  prefix = false,
+): string => {
   if (n < 0n) throw new Error('Only non-negative integers are supported');
 
   const hex = n.toString(16);
-  const padded = hex.padStart(byteLength ? byteLength * 2 : hex.length + (hex.length % 2), '0');
+  const padded = hex.padStart(
+    byteLength ? byteLength * 2 : hex.length + (hex.length % 2),
+    '0',
+  );
 
   return (prefix ? '0x' : '') + padded;
 };

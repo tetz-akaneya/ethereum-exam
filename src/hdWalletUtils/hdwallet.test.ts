@@ -48,16 +48,32 @@ describe('selfmadeCKDpriv', () => {
     const I = createMasterKeyBip32(seedBuf);
 
     const child1 = selfmadeCKDpriv(I.key, I.chainCode, HARDENED_OFFSET + 0);
-    expect(bufferToHex(child1.key, true)).toEqual(wallet.derivePath("m/0'").privateKey);
-    expect(bufferToHex(child1.chainCode, true)).toEqual(wallet.derivePath("m/0'").chainCode);
+    expect(bufferToHex(child1.key, true)).toEqual(
+      wallet.derivePath("m/0'").privateKey,
+    );
+    expect(bufferToHex(child1.chainCode, true)).toEqual(
+      wallet.derivePath("m/0'").chainCode,
+    );
 
-    const child2 = selfmadeCKDpriv(child1.key, child1.chainCode, HARDENED_OFFSET + 0);
-    expect(bufferToHex(child2.chainCode, true)).toEqual(wallet.derivePath("m/0'/0'").chainCode);
-    expect(bufferToHex(child2.key, true)).toEqual(wallet.derivePath("m/0'/0'").privateKey);
+    const child2 = selfmadeCKDpriv(
+      child1.key,
+      child1.chainCode,
+      HARDENED_OFFSET + 0,
+    );
+    expect(bufferToHex(child2.chainCode, true)).toEqual(
+      wallet.derivePath("m/0'/0'").chainCode,
+    );
+    expect(bufferToHex(child2.key, true)).toEqual(
+      wallet.derivePath("m/0'/0'").privateKey,
+    );
 
     const child3 = selfmadeCKDpriv(child2.key, child2.chainCode, 0);
-    expect(bufferToHex(child3.chainCode, true)).toEqual(wallet.derivePath("m/0'/0'/0").chainCode);
-    expect(bufferToHex(child3.key, true)).toEqual(wallet.derivePath("m/0'/0'/0").privateKey);
+    expect(bufferToHex(child3.chainCode, true)).toEqual(
+      wallet.derivePath("m/0'/0'/0").chainCode,
+    );
+    expect(bufferToHex(child3.key, true)).toEqual(
+      wallet.derivePath("m/0'/0'/0").privateKey,
+    );
   });
 });
 
@@ -80,7 +96,8 @@ describe('selfmadeDeriveKey', () => {
             index,
           });
           const seed = hexToBuffer(bigintToHex(seedNum));
-          const wallet = ethers.HDNodeWallet.fromSeed(seed).derivePath(generatedPath);
+          const wallet =
+            ethers.HDNodeWallet.fromSeed(seed).derivePath(generatedPath);
           const expected = {
             key: wallet.privateKey,
             chainCode: wallet.chainCode,

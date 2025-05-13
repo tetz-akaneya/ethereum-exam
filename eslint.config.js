@@ -12,6 +12,7 @@ export default tseslint.config(
       },
     },
     plugins: {
+      '@typescript-eslint': tseslint.plugin,
       prettier: eslintPluginPrettier,
     },
     rules: {
@@ -22,6 +23,15 @@ export default tseslint.config(
       // Prettier統合（警告ではなくエラーにする）
       'prettier/prettier': 'error',
       'max-len': ['error', { code: 100 }],
+      'object-curly-newline': [
+        'error',
+        {
+          ObjectExpression: { multiline: true, minProperties: 2 },
+          ObjectPattern: { multiline: true, minProperties: 2 },
+          ImportDeclaration: { multiline: true, minProperties: 2 },
+          ExportDeclaration: { multiline: true, minProperties: 2 },
+        },
+      ],
     },
   },
   eslintConfigPrettier,
