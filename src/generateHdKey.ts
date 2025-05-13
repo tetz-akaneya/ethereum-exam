@@ -1,10 +1,12 @@
 import { HDNodeWallet, Mnemonic, randomBytes } from 'ethers';
 
 type AllowedCoinType = 'Ethereum';
+type AllowedPurpose = 'BIP44';
 
-type AllowedPurpose = 44;
+export const purposeDict: Record<AllowedPurpose, number> = {
+  BIP44: 44,
+};
 
-export const defaultPurpose: AllowedPurpose = 44;
 export const coinTypeDict: Record<AllowedCoinType, number> = {
   Ethereum: 60,
 };

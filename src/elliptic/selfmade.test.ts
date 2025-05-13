@@ -20,10 +20,10 @@ import { multiplyGNTimesEc } from './test/libraryImp';
 import {
   changePathDict,
   coinTypeDict,
-  defaultPurpose,
   genBipTypicalPath,
+  purposeDict,
   typedKeys,
-} from '../generateKey';
+} from '../generateHdKey';
 const secp256k1 = require('secp256k1');
 
 describe('createMasterKeyBip32', () => {
@@ -64,14 +64,14 @@ describe('selfmadeDeriveKey', () => {
     fc.assert(
       fc.property(
         fc.bigInt({ min: 2n ** 128n, max: 2n ** 512n - 1n }),
-        fc.constantFrom(defaultPurpose),
+        fc.constantFrom(...typedKeys(purposeDict)),
         fc.constantFrom(...typedKeys(coinTypeDict)),
         fc.integer({ min: 0, max: 2 ** 31 - 1 }),
         fc.constantFrom(...typedKeys(changePathDict)),
         fc.integer({ min: 0, max: 2 ** 31 - 1 }),
-        (seedNum, purpose, coinTypeKey, account, changeKey, index) => {
+        (seedNum, purposeKey, coinTypeKey, account, changeKey, index) => {
           const generatedPath = genBipTypicalPath({
-            purpose,
+            purpose: purposeDict[purposeKey],
             coinType: coinTypeDict[coinTypeKey],
             account,
             change: changePathDict[changeKey],

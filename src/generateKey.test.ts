@@ -3,11 +3,11 @@ import {
   changePathDict,
   coinTypeDict,
   createMnemonic,
-  defaultPurpose,
   deriveKey,
   genBipTypicalPath,
+  purposeDict,
   typedKeys,
-} from './generateKey';
+} from './generateHdKey';
 
 const passphrase = 'passphrase';
 
@@ -17,7 +17,7 @@ test('static mnemonic derives to key', () => {
       'breeze tackle yellow jazz lion east prison multiply senior struggle celery galaxy',
     passphrase,
     path: genBipTypicalPath({
-      purpose: defaultPurpose,
+      purpose: purposeDict.BIP44,
       coinType: coinTypeDict.Ethereum,
       account: 0,
       change: changePathDict.external,
@@ -38,7 +38,7 @@ test('random mnemonic derives to key', () => {
     mnemonicString,
     passphrase,
     path: genBipTypicalPath({
-      purpose: defaultPurpose,
+      purpose: purposeDict.BIP44,
       coinType: coinTypeDict.Ethereum,
       account: 0,
       change: changePathDict.external,
@@ -51,24 +51,24 @@ test('random mnemonic derives to key', () => {
   expect(key.privateKey.length).toEqual(66);
 });
 
-test('genPath generates correct BIP44 path format for Ethereum', () => {
+test('genPath generates correct BIP44 path format', () => {
   fc.assert(
     fc.property(
-      fc.constantFrom(defaultPurpose),
+      fc.constantFrom(...typedKeys(purposeDict)),
       fc.constantFrom(...typedKeys(coinTypeDict)),
       fc.integer({ min: 0, max: 2 ** 31 - 1 }),
       fc.constantFrom(...typedKeys(changePathDict)),
       fc.integer({ min: 0, max: 2 ** 31 - 1 }),
-      (purpose, coinTypeKey, account, changeKey, index) => {
+      (purposeKey, coinTypeKey, account, changeKey, index) => {
         const result = genBipTypicalPath({
-          purpose,
+          purpose: purposeDict[purposeKey],
           coinType: coinTypeDict[coinTypeKey],
           account,
           change: changePathDict[changeKey],
           index,
         });
 
-        const expected = `m/${purpose}'/${coinTypeDict[coinTypeKey]}'/${account}'/${changePathDict[changeKey]}/${index}`;
+        const expected = `m/${purposeDict[purposeKey]}'/${coinTypeDict[coinTypeKey]}'/${account}'/${changePathDict[changeKey]}/${index}`;
         expect(result).toEqual(expected);
       },
     ),
@@ -78,3 +78,4 @@ test('genPath generates correct BIP44 path format for Ethereum', () => {
 test('createMnemonic example', () => {
   expect(createMnemonic({ byteSize: 32 }).split(' ').length).toEqual(24);
 });
+
