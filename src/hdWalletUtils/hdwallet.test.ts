@@ -107,7 +107,7 @@ describe('selfmadeDeriveKey', () => {
 describe('createAddress', () => {
   it('works same as library', () => {
     fc.assert(
-      fc.property(fc.bigInt({ min: 1n, max: CURVE_ORDER }), (n) => {
+      fc.property(fc.bigInt({ min: 1n, max: CURVE_ORDER - 1n }), (n) => {
         const hex = n.toString(16).padStart(64, '0');
         const privBuf = Buffer.from(hex, 'hex');
 
