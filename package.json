@@ -5,8 +5,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "build": "esbuild src/**/*.ts --outdir=dist --platform=node --format=esm",
+    "build": "tsc",
     "test": "jest",
+    "build-and-run-cli": "npm run build && ethereum_exam",
     "format": "prettier --write 'src/**/*.{ts,tsx,js,jsx,json,md}' ."
   },
   "keywords": [],

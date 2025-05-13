@@ -20,11 +20,15 @@ program
   });
 
 program
-  .command('derive address')
+  .command('address')
   .description('derives addresses from private key and paths')
   .option('-c, --config <path>', 'Path to config file')
   .action((options) => {
+    options.config ||= 'secret_params.json'
+    console.log(33)
     const json = JSON.parse(readFileSync(path.resolve(options.config), 'utf8'))
+    console.log(json)
+    return
     const key = deriveKey({
       mnemonicString: json.mnemonic,
       passphrase: json.passphrase,
