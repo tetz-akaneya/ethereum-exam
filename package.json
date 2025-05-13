@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "jest",
-    "format": "prettier --write ."
+    "format": "prettier --write 'src/**/*.{ts,tsx,js,jsx,json,md}' ."
   },
   "keywords": [],
   "author": "",
