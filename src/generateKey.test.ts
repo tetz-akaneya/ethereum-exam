@@ -1,4 +1,5 @@
-import { changePathDict, createMnemonic, deriveKey, genPath, coinTypeDict, defaultPurpose } from "./generateKey";
+import fc from "fast-check";
+import { changePathDict, coinTypeDict, createMnemonic, defaultPurpose, deriveKey, genPath, typedKeys } from "./generateKey";
 
 const passphrase = 'passphrase'
 
@@ -41,15 +42,29 @@ test('random mnemonic derives to key', () => {
   expect(key.privateKey.length).toEqual(66)
 })
 
-test('genPath example', () => {
-  expect(genPath({
-    purpose: defaultPurpose,
-    coinType: coinTypeDict.Ethereum,
-    account: 0,
-    change: changePathDict.external,
-    index: 0,
-  })).toEqual("m/44'/60'/0'/0/0")
-})
+test('genPath generates correct BIP44 path format for Ethereum', () => {
+  fc.assert(
+    fc.property(
+      fc.constantFrom(defaultPurpose),
+      fc.constantFrom(...typedKeys(coinTypeDict)),
+      fc.integer({ min: 0, max: 2 ** 32 - 1 }),
+      fc.constantFrom(...typedKeys(changePathDict)),
+      fc.integer({ min: 0, max: 2 ** 32 - 1 }),
+      (purpose, coinTypeKey, account, changeKey, index) => {
+        const result = genPath({
+          purpose,
+          coinType: coinTypeDict[coinTypeKey],
+          account,
+          change: changePathDict[changeKey],
+          index,
+        });
+
+        const expected = `m/${purpose}'/${coinTypeDict[coinTypeKey]}'/${account}'/${changePathDict[changeKey]}/${index}`;
+        expect(result).toEqual(expected);
+      }
+    )
+  );
+});
 
 test('createMnemonic example', () => {
   expect(

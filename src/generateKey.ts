@@ -1,14 +1,19 @@
 import { HDNodeWallet, Mnemonic, randomBytes, } from "ethers";
 
-type allowedCoinType =
+type AllowedCoinType =
   'Ethereum'
 
-type allowedPurpose =
+type AllowedPurpose =
   44
-export const defaultPurpose: allowedPurpose = 44
-export const coinTypeDict: Record<allowedCoinType, number> = {
+
+export const defaultPurpose: AllowedPurpose = 44
+export const coinTypeDict: Record<AllowedCoinType, number> = {
   Ethereum: 60,
 }
+
+export const typedKeys = <T extends object>(obj: T): (keyof T)[] => {
+  return Object.keys(obj) as (keyof T)[];
+};
 
 export const changePathDict = {
   external: 0,
