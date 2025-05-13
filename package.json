@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "build": "tsc",
+    "build": "esbuild src/**/*.ts --outdir=dist --platform=node --format=esm",
     "test": "jest",
     "format": "prettier --write 'src/**/*.{ts,tsx,js,jsx,json,md}' ."
   },
@@ -16,8 +16,10 @@
     "@types/elliptic": "^6.4.18",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.15.14",
+    "@types/secp256k1": "^4.0.6",
     "@typescript-eslint/eslint-plugin": "^8.32.0",
     "@typescript-eslint/parser": "^8.32.0",
+    "esbuild": "^0.25.4",
     "eslint": "^9.26.0",
     "eslint-config-prettier": "^10.1.3",
     "eslint-plugin-prettier": "^5.4.0",
@@ -33,5 +35,8 @@
     "elliptic": "^6.6.1",
     "ethers": "^6.14.0",
     "secp256k1": "^5.0.1"
+  },
+  "bin": {
+    "ethereum_exam": "dist/cli.js"
   }
 }

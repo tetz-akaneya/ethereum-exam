@@ -1,10 +1,10 @@
 import { ethers, Wallet } from 'ethers';
 import * as fc from 'fast-check';
 import {
-  selfmadeCKDpriv,
   createMasterKeyBip32,
   createPublicKey,
   ethereumAddressFromPrivKey,
+  selfmadeCKDpriv,
   selfmadeDeriveKey,
 } from './hdwallet';
 import { multiplyGNTimesEc } from './testUse/libraryImp';
@@ -16,17 +16,16 @@ import {
   purposeDict,
   typedKeys,
 } from '../generateHdKey';
+import { CURVE_ORDER, G, HARDENED_OFFSET } from './constant';
 import {
-  hexToBuffer,
-  bufferToHex,
   bigintToHex,
+  bufferToHex,
+  hexToBuffer,
   hexToUint8Array,
   multiplyPointNTimes,
 } from './convert';
-import { HARDENED_OFFSET, CURVE_ORDER, G } from './constant';
 
-// 型がないからか、importができなかったのでrequire
-const secp256k1 = require('secp256k1');
+import secp256k1 from 'secp256k1';
 
 describe('createMasterKeyBip32', () => {
   it('works same as library', () => {
