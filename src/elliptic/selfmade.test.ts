@@ -3,7 +3,7 @@ import * as fc from 'fast-check';
 import {
   bigintToHex,
   bufferToHex,
-  CKDpriv,
+  selfmadeCKDpriv,
   createMasterKeyBip32,
   createPublicKey,
   CURVE_ORDER,
@@ -24,6 +24,8 @@ import {
   purposeDict,
   typedKeys,
 } from '../generateHdKey';
+
+// 型がないからか、importができなかったのでrequire
 const secp256k1 = require('secp256k1');
 
 describe('createMasterKeyBip32', () => {
@@ -31,36 +33,38 @@ describe('createMasterKeyBip32', () => {
     const seed = '000102030405060708090a0b0c0d0e0f';
     const seedBuf = hexToBuffer(seed);
     const wallet = ethers.HDNodeWallet.fromSeed(seedBuf);
-    const I = createMasterKeyBip32(seedBuf);
+    const actual = createMasterKeyBip32(seedBuf);
 
-    expect(wallet.privateKey).toEqual(bufferToHex(I.key, true));
-    expect(wallet.chainCode).toEqual(bufferToHex(I.chainCode, true));
+    // ethers.js と同じ結果
+    // buffer での比較が不慣れだったので文字列にして比較
+    expect(bufferToHex(actual.key, true)).toEqual(wallet.privateKey);
+    expect(bufferToHex(actual.chainCode, true)).toEqual(wallet.chainCode)
   });
 });
 
-describe('deriveHardened', () => {
-  it('should derive a hardened child key correctly', () => {
+describe('selfmadeCKDpriv', () => {
+  it('should derive a hardened child key with static path', () => {
     const seed = '000102030405060708090a0b0c0d0e0f';
     const seedBuf = hexToBuffer(seed);
     const wallet = ethers.HDNodeWallet.fromSeed(seedBuf);
     const I = createMasterKeyBip32(seedBuf);
 
-    const child1 = CKDpriv(I.key, I.chainCode, HARDENED_OFFSET + 0);
+    const child1 = selfmadeCKDpriv(I.key, I.chainCode, HARDENED_OFFSET + 0);
     expect(bufferToHex(child1.key, true)).toEqual(wallet.derivePath("m/0'").privateKey);
     expect(bufferToHex(child1.chainCode, true)).toEqual(wallet.derivePath("m/0'").chainCode);
 
-    const child2 = CKDpriv(child1.key, child1.chainCode, HARDENED_OFFSET + 0);
+    const child2 = selfmadeCKDpriv(child1.key, child1.chainCode, HARDENED_OFFSET + 0);
     expect(bufferToHex(child2.chainCode, true)).toEqual(wallet.derivePath("m/0'/0'").chainCode);
     expect(bufferToHex(child2.key, true)).toEqual(wallet.derivePath("m/0'/0'").privateKey);
 
-    const child3 = CKDpriv(child2.key, child2.chainCode, 0);
+    const child3 = selfmadeCKDpriv(child2.key, child2.chainCode, 0);
     expect(bufferToHex(child3.chainCode, true)).toEqual(wallet.derivePath("m/0'/0'/0").chainCode);
     expect(bufferToHex(child3.key, true)).toEqual(wallet.derivePath("m/0'/0'/0").privateKey);
   });
 });
 
 describe('selfmadeDeriveKey', () => {
-  it('should return addresses that is same as libarary', () => {
+  it('should derive addresses', () => {
     fc.assert(
       fc.property(
         fc.bigInt({ min: 2n ** 128n, max: 2n ** 512n - 1n }),
@@ -101,45 +105,51 @@ describe('selfmadeDeriveKey', () => {
   });
 });
 
-test('createAddress', () => {
-  fc.assert(
-    fc.property(fc.bigInt({ min: 1n, max: CURVE_ORDER }), (n) => {
-      const hex = n.toString(16).padStart(64, '0');
-      const privBuf = Buffer.from(hex, 'hex');
+describe('createAddress', () => {
+  it('works same as library', () => {
+    fc.assert(
+      fc.property(fc.bigInt({ min: 1n, max: CURVE_ORDER }), (n) => {
+        const hex = n.toString(16).padStart(64, '0');
+        const privBuf = Buffer.from(hex, 'hex');
 
-      const customResult = ethereumAddressFromPrivKey(privBuf);
-      const wallet = new Wallet('0x' + hex);
-      const libResult = wallet.address;
+        const customResult = ethereumAddressFromPrivKey(privBuf);
+        const wallet = new Wallet('0x' + hex);
+        const libResult = wallet.address;
 
-      expect(customResult).toEqual(libResult.toLowerCase());
-    }),
-  );
+        expect(customResult).toEqual(libResult.toLowerCase());
+      }),
+    );
+  });
+})
+
+describe('multiplyPointNTimes', () => {
+  it('works same as library', () => {
+    fc.assert(
+      fc.property(
+        fc.bigInt({ min: 1n, max: 2n ** 256n - 1n }), // ← max は inclusive なので -1n
+        (n) => {
+          const customResult = multiplyPointNTimes(n, G);
+          const libResult = multiplyGNTimesEc(n);
+
+          expect(customResult).toEqual(libResult);
+        },
+      ),
+    );
+  });
 });
 
-test('compare multiplyPointNTimes to library', () => {
-  fc.assert(
-    fc.property(
-      fc.bigInt({ min: 1n, max: 2n ** 256n - 1n }), // ← max は inclusive なので -1n
-      (n) => {
-        const customResult = multiplyPointNTimes(n, G);
-        const libResult = multiplyGNTimesEc(n);
+describe('createPublicKey', () => {
+  it('works same as library', () => {
+    fc.assert(
+      fc.property(fc.bigInt({ min: 1n, max: CURVE_ORDER - 1n }), (n) => {
+        const hex = n.toString(16).padStart(64, '0');
+        const privBuf = hexToUint8Array(hex);
 
-        expect(customResult).toEqual(libResult);
-      },
-    ),
-  );
-});
+        const P1 = createPublicKey(privBuf, true);
+        const P2 = secp256k1.publicKeyCreate(privBuf, true);
 
-test('compare createPublicKey to library', () => {
-  fc.assert(
-    fc.property(fc.bigInt({ min: 1n, max: CURVE_ORDER - 1n }), (n) => {
-      const hex = n.toString(16).padStart(64, '0');
-      const privBuf = hexToUint8Array(hex);
-
-      const P1 = createPublicKey(privBuf, true);
-      const P2 = secp256k1.publicKeyCreate(privBuf, true);
-
-      expect(P1).toEqual(P2);
-    }),
-  );
-});
+        expect(P1).toEqual(P2);
+      }),
+    );
+  });
+})
