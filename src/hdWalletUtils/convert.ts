@@ -1,16 +1,20 @@
 import { Point, modP } from './constant';
-// ----------------------
-// Convert 関数
-// ----------------------
-// Uint8Array から Hex 文字列に変換
-export const uint8ArrayToHex = (arrayBuffer: Uint8Array): string => {
-  return Array.from(arrayBuffer)
-    .map((i) => {
-      return i.toString(16).padStart(2, '0');
-    })
-    .join('');
-};
 
+// ----------------------
+// Convert 関数群
+// ----------------------
+
+/**
+ * Uint8Array → Hex文字列（小文字, プレフィックスなし）
+ */
+export const uint8ArrayToHex = (arrayBuffer: Uint8Array): string =>
+  Array.from(arrayBuffer)
+    .map((i) => i.toString(16).padStart(2, '0'))
+    .join('');
+
+/**
+ * bigint → number（安全な範囲内のみ）
+ */
 export const bigintToInt = (bn: bigint): number => {
   const num = Number(bn);
   if (!Number.isSafeInteger(num)) {
@@ -19,69 +23,65 @@ export const bigintToInt = (bn: bigint): number => {
   return num;
 };
 
-export const uint8ArrayToBuffer = (arr: Uint8Array): Buffer => {
-  return Buffer.from(arr.buffer, arr.byteOffset, arr.byteLength);
-};
+/**
+ * Uint8Array → Buffer（コピーなし）
+ */
+export const uint8ArrayToBuffer = (arr: Uint8Array): Buffer =>
+  Buffer.from(arr.buffer, arr.byteOffset, arr.byteLength);
 
 /**
- * Hex 文字列からUint8Arrayに変換
+ * Hex文字列 → Uint8Array
  */
 export const hexToUint8Array = (hex: string): Uint8Array => {
-  // remove 0x prefix if present
-  if (hex.startsWith('0x')) {
-    hex = hex.slice(2);
-  }
-
-  if (hex.length % 2 !== 0) {
-    throw new Error('Hex string must have even length');
-  }
-
-  if (!/^[0-9a-fA-F]*$/.test(hex)) {
-    throw new Error('Invalid hex string: contains non-hex characters');
-  }
+  if (hex.startsWith('0x')) hex = hex.slice(2);
+  if (hex.length % 2 !== 0) throw new Error('Hex string must have even length');
+  if (!/^[0-9a-fA-F]*$/.test(hex)) throw new Error('Invalid hex string');
 
   const len = hex.length / 2;
   const u8 = new Uint8Array(len);
   for (let i = 0; i < len; i++) {
     u8[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
   }
-
   return u8;
 };
 
+/**
+ * Hex文字列 → Buffer
+ */
 export const hexToBuffer = (hex: string): Buffer => {
-  if (hex.length % 2 !== 0) {
-    throw new Error('Hex string must have even length');
-  }
+  if (hex.length % 2 !== 0) throw new Error('Hex string must have even length');
   return Buffer.from(hex, 'hex');
 };
 
-export const bufferToHex = (buffer: Buffer, prefix = false): string => {
-  let suffixStr = '';
-  if (prefix) {
-    suffixStr = '0x';
-  }
-  return suffixStr + buffer.toString('hex');
-};
+/**
+ * Buffer → Hex文字列（prefix 付き指定可）
+ */
+export const bufferToHex = (buffer: Buffer, prefix = false): string =>
+  (prefix ? '0x' : '') + buffer.toString('hex');
 
-export const bufferToBigInt = (buffer: Buffer): bigint => {
-  return BigInt('0x' + buffer.toString('hex'));
-};
+/**
+ * Buffer → bigint（BE解釈）
+ */
+export const bufferToBigInt = (buffer: Buffer): bigint =>
+  BigInt('0x' + buffer.toString('hex'));
 
+/**
+ * number → Buffer（BE, 固定長, 最大4byte）
+ */
 export const intToBuffer = (n: number, byteLength: number): Buffer => {
   if (!Number.isInteger(n) || n < 0) {
     throw new Error('Only non-negative integers are supported');
   }
-
   const buf = Buffer.alloc(byteLength);
-  buf.writeUIntBE(n, byteLength - 4, 4); // 最大4バイト（32bit）対応
+  buf.writeUIntBE(n, byteLength - 4, 4); // 右詰め
   return buf;
 };
 
+/**
+ * bigint → Buffer（BE, 固定長, オーバーフロー検出あり）
+ */
 export const bigintToBuffer = (n: bigint, byteSize: number): Buffer => {
-  if (n < 0n) {
-    throw new Error('Only non-negative integers are supported');
-  }
+  if (n < 0n) throw new Error('Only non-negative integers are supported');
 
   const hex = n.toString(16).padStart(byteSize * 2, '0');
   if (hex.length > byteSize * 2) {
@@ -91,36 +91,43 @@ export const bigintToBuffer = (n: bigint, byteSize: number): Buffer => {
   return Buffer.from(hex, 'hex');
 };
 
-export const bigintToHex = (n: bigint, byteLength?: number, prefix = false): string => {
+/**
+ * bigint → Hex文字列（プレフィックス/ゼロ埋めあり）
+ */
+export const bigintToHex = (
+  n: bigint,
+  byteLength?: number,
+  prefix = false
+): string => {
   if (n < 0n) throw new Error('Only non-negative integers are supported');
 
   const hex = n.toString(16);
-  let padStartSize: number;
-  if (byteLength) {
-    padStartSize = byteLength * 2;
-  } else if (hex.length % 2 === 1) {
-    padStartSize = hex.length + 1;
-  } else {
-    padStartSize = hex.length;
-  }
+  const padded = hex.padStart(
+    byteLength ? byteLength * 2 : hex.length + (hex.length % 2),
+    '0'
+  );
 
-  const paddedHex = hex.padStart(padStartSize, '0');
-  const prefixStr = prefix ? '0x' : '';
-  return prefixStr + paddedHex;
+  return (prefix ? '0x' : '') + padded;
 };
-export const bufferToUint8Array = (buf: Buffer): Uint8Array => {
-  return new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength);
-};
+
+/**
+ * Buffer → Uint8Array（コピーなし）
+ */
+export const bufferToUint8Array = (buf: Buffer): Uint8Array =>
+  new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength);
+
+/**
+ * Hex文字列 → bigint（0x付き可）
+ */
 export const hexToBigInt = (hex: string): bigint => {
-  if (hex.startsWith('0x')) {
-    hex = hex.slice(2);
-  }
-  if (!/^[0-9a-fA-F]*$/.test(hex)) {
-    throw new Error('Invalid hex string');
-  }
+  if (hex.startsWith('0x')) hex = hex.slice(2);
+  if (!/^[0-9a-fA-F]*$/.test(hex)) throw new Error('Invalid hex string');
   return BigInt('0x' + hex);
 };
 
+/**
+ * number → bigint（非負整数のみ）
+ */
 export const intToBigInt = (n: number): bigint => {
   if (!Number.isInteger(n) || n < 0) {
     throw new Error('Only non-negative integers are supported');
@@ -128,6 +135,9 @@ export const intToBigInt = (n: number): bigint => {
   return BigInt(n);
 };
 
+/**
+ * Buffer → number（最大6byte, BE）
+ */
 export const bufferToInt = (buf: Buffer): number => {
   if (buf.length > 6) {
     throw new Error('Too large to safely convert to number');
@@ -136,17 +146,17 @@ export const bufferToInt = (buf: Buffer): number => {
 };
 
 // ------------------
-// 数学(有限体)
+// 数学ユーティリティ (有限体)
 // ------------------
-// 有限体 F_p の値に強制的に変換
-// JSの% p は、[-p+1, p-1]の値を取るが、有限体としては[0,p-1]に収まる必要があるため
-export const toBigintModP = (n: bigint, p: bigint) => {
-  return ((n % p) + p) % p;
-};
 
 /**
- * inverseOfModP: a の mod p における逆元（a⁻¹ ≡ a⁻¹ mod p）を計算する
- * 拡張ユークリッドの互除法を使う
+ * bigint を F_p の正準表現に変換（常に 0 ≦ n < p）
+ */
+export const toBigintModP = (n: bigint, p: bigint): bigint =>
+  ((n % p) + p) % p;
+
+/**
+ * 逆元 a⁻¹ mod p を拡張ユークリッド互除法で計算（a, pは互いに素）
  */
 export const inverseOfModP = (a: bigint, p: bigint): bigint => {
   a = toBigintModP(a, p);
@@ -163,10 +173,11 @@ export const inverseOfModP = (a: bigint, p: bigint): bigint => {
 };
 
 // ------------------
-// 数学(secp256k1)
+// 楕円曲線演算 (secp256k1)
 // ------------------
+
 /**
- * 楕円曲線上の2点 P, Q を加算する（P = Q の場合もOK）
+ * 楕円曲線上の点PとQを加算（加算/倍加とも対応）
  */
 export function pointAdd(P: Point, Q: Point): Point {
   const [x1, y1] = P;
@@ -175,11 +186,11 @@ export function pointAdd(P: Point, Q: Point): Point {
   let lambda: bigint;
 
   if (x1 === x2 && y1 === y2) {
-    // 倍加（doubling）
-    (lambda = 3n * x1 * x1 * inverseOfModP(2n * y1, modP)), modP;
+    // 点の倍加
+    lambda = (3n * x1 * x1 * inverseOfModP(2n * y1, modP)) % modP;
   } else {
-    // 一般加算
-    (lambda = (y2 - y1) * inverseOfModP(x2 - x1, modP)), modP;
+    // 通常の加算
+    lambda = ((y2 - y1) * inverseOfModP(x2 - x1, modP)) % modP;
   }
 
   const x3 = toBigintModP(lambda * lambda - x1 - x2, modP);
@@ -189,7 +200,7 @@ export function pointAdd(P: Point, Q: Point): Point {
 }
 
 /**
- * scalarMult: 楕円曲線上の点 G にスカラー k を掛ける（k·G）
+ * 楕円曲線上の点 G にスカラー k をかける（k倍演算）
  */
 export function multiplyPointNTimes(k: bigint, G: Point): Point {
   let R: Point | null = null;
@@ -197,7 +208,6 @@ export function multiplyPointNTimes(k: bigint, G: Point): Point {
 
   while (k > 0n) {
     if (k & 1n) {
-      // Rが無限遠点(null)の場合は、0として計算
       R = R === null ? addend : pointAdd(R, addend);
     }
     addend = pointAdd(addend, addend);
