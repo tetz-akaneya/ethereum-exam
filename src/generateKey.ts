@@ -1,15 +1,13 @@
-import { HDNodeWallet, Mnemonic, randomBytes, } from "ethers";
+import { HDNodeWallet, Mnemonic, randomBytes } from 'ethers';
 
-type AllowedCoinType =
-  'Ethereum'
+type AllowedCoinType = 'Ethereum';
 
-type AllowedPurpose =
-  44
+type AllowedPurpose = 44;
 
-export const defaultPurpose: AllowedPurpose = 44
+export const defaultPurpose: AllowedPurpose = 44;
 export const coinTypeDict: Record<AllowedCoinType, number> = {
   Ethereum: 60,
-}
+};
 
 export const typedKeys = <T extends object>(obj: T): (keyof T)[] => {
   return Object.keys(obj) as (keyof T)[];
@@ -18,18 +16,18 @@ export const typedKeys = <T extends object>(obj: T): (keyof T)[] => {
 export const changePathDict = {
   external: 0,
   internal: 1,
-}
+};
 
 const hardenPath = (index: string | number) => {
-  return `${index}'`
-}
+  return `${index}'`;
+};
 
-export const genPath = (arg: {
-  purpose: number,
-  coinType: number,
-  account: number,
-  change: number,
-  index: number
+export const genBipTypicalPath = (arg: {
+  purpose: number;
+  coinType: number;
+  account: number;
+  change: number;
+  index: number;
 }): string => {
   return [
     'm',
@@ -38,16 +36,12 @@ export const genPath = (arg: {
     hardenPath(arg.account),
     arg.change,
     arg.index,
-  ].join('/')
-}
+  ].join('/');
+};
 
 // ニーモニック、パスフレーズからHDウォレットができるので、任意のpathのアドレスを導出する。
-export const deriveKey = (arg: {
-  mnemonicString: string,
-  passphrase: string,
-  path: string,
-}) => {
-  const mnemonic = Mnemonic.fromPhrase(arg.mnemonicString, arg.passphrase)
+export const deriveKey = (arg: { mnemonicString: string; passphrase: string; path: string }) => {
+  const mnemonic = Mnemonic.fromPhrase(arg.mnemonicString, arg.passphrase);
 
   const seed = mnemonic.computeSeed();
   const parentWallet = HDNodeWallet.fromSeed(seed);
@@ -58,18 +52,18 @@ export const deriveKey = (arg: {
     publicKey: wallet.publicKey,
     privateKey: wallet.privateKey,
     address: wallet.address,
-  }
-}
+  };
+};
 
 // mnemonic を作る
 // 32byteが推奨
 // 長さは合っているが、コールドウォレットのニーモニックのランダム性はもっと慎重に決めるべき
 export const createMnemonic = (arg: { byteSize: number }) => {
   if (arg.byteSize < 31) {
-    throw new Error('insecure byte size')
+    throw new Error('insecure byte size');
   }
-  const entropy = randomBytes(arg.byteSize)
-  const mnemonic = Mnemonic.fromEntropy(entropy)
+  const entropy = randomBytes(arg.byteSize);
+  const mnemonic = Mnemonic.fromEntropy(entropy);
 
-  return mnemonic.phrase
-}
+  return mnemonic.phrase;
+};

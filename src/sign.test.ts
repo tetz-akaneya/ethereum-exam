@@ -1,7 +1,7 @@
-import { parseEther, parseUnits, TransactionRequest, toBeArray } from "ethers";
-import { decodeTx } from "./decodeTx";
-import { sign } from "./sign";
-import fc from 'fast-check'
+import { parseEther, parseUnits, TransactionRequest, toBeArray } from 'ethers';
+import { decodeTx } from './decodeTx';
+import { sign } from './sign';
+import fc from 'fast-check';
 
 // トランザクションデータ（オンライン側から取得し、オフラインに持ち込む）
 const testTxData: TransactionRequest = {
@@ -20,16 +20,16 @@ const testTxData: TransactionRequest = {
   chainId: 1,
   // 型。https://eips.ethereum.org/EIPS/eip-2718
   // 2: EIP-1559
-  type: 2
+  type: 2,
 };
 
-const testPrivKey = '0xebce77fe4c7df7c3795e6a51b37d5d6ebf21c844d0ed4da8861b0fa7f48f0d1a'
+const testPrivKey = '0xebce77fe4c7df7c3795e6a51b37d5d6ebf21c844d0ed4da8861b0fa7f48f0d1a';
 
 test('signs without error', async () => {
   const signedTx = await sign({
     txData: testTxData,
-    privateKey: testPrivKey
-  })
+    privateKey: testPrivKey,
+  });
 
   expect(signedTx.startsWith('0x')).toBe(true);
 });
@@ -37,9 +37,9 @@ test('signs without error', async () => {
 test('decodes to correct value', async () => {
   const signedTx = await sign({
     txData: testTxData,
-    privateKey: testPrivKey
-  })
-  const decodedTx = decodeTx(signedTx)
+    privateKey: testPrivKey,
+  });
+  const decodedTx = decodeTx(signedTx);
 
   expect(decodedTx).toStrictEqual({
     chainId: BigInt(testTxData.chainId!),
@@ -51,7 +51,6 @@ test('decodes to correct value', async () => {
     nonce: testTxData.nonce,
     to: testTxData.to,
     type: testTxData.type,
-    value: BigInt(10 ** 16)
+    value: BigInt(10 ** 16),
   });
-})
-
+});

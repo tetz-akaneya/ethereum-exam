@@ -1,7 +1,7 @@
-import { Transaction } from 'ethers'
+import { Transaction } from 'ethers';
 
 export const decodeTx = (rawTx: string) => {
-  const decoded = Transaction.from(rawTx)
+  const decoded = Transaction.from(rawTx);
   if (!decoded) {
     return null;
   }
@@ -17,5 +17,5 @@ export const decodeTx = (rawTx: string) => {
     data: decoded.data,
     chainId: decoded.chainId,
     type: decoded.type,
-  }
-}
+  };
+};

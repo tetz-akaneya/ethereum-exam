@@ -1,3 +1,1 @@
-export const fetchBlockChain = async () => {
-
-}
+export const fetchBlockChain = async () => {};

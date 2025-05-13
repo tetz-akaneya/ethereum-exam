@@ -21,6 +21,7 @@ export default tseslint.config(
 
       // Prettier統合（警告ではなくエラーにする）
       'prettier/prettier': 'error',
+      'max-len': ['error', { code: 100 }],
     },
   },
   eslintConfigPrettier,
