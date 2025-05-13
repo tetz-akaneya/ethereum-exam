@@ -107,7 +107,7 @@ describe('Conversion functions', () => {
           const buf = uint8ArrayToBuffer(arr);
           const restored = bufferToUint8Array(buf);
           expect([...restored]).toEqual([...arr]);
-        }),
+        })
       );
     });
   });
@@ -119,7 +119,7 @@ describe('Conversion functions', () => {
           const hex = bigintToHex(bn, undefined, true); // 0x-prefixed
           const parsed = hexToBigInt(hex);
           expect(parsed).toBe(bn);
-        }),
+        })
       );
     });
   });
@@ -130,7 +130,7 @@ describe('Conversion functions', () => {
         fc.property(fc.integer({ min: 0, max: Number.MAX_SAFE_INTEGER }), (n) => {
           const result = intToBigInt(n);
           expect(result).toBe(BigInt(n));
-        }),
+        })
       );
     });
   });
@@ -142,7 +142,7 @@ describe('Conversion functions', () => {
           const buf = intToBuffer(n, 4);
           const result = bufferToInt(buf);
           expect(result).toBe(n);
-        }),
+        })
       );
     });
   });

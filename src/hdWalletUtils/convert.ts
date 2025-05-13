@@ -118,12 +118,9 @@ export const hexToBigInt = (hex: string): bigint => {
 };
 
 /**
- * number → bigint（非負整数のみ）
+ * number → bigint
  */
 export const intToBigInt = (n: number): bigint => {
-  if (!Number.isInteger(n) || n < 0) {
-    throw new Error('Only non-negative integers are supported');
-  }
   return BigInt(n);
 };
 
@@ -139,8 +136,8 @@ export const bufferToInt = (buf: Buffer): number => {
 
 // ------------------
 // 数学ユーティリティ (有限体)
+// bigint で基本的に計算して、最後にtoBigintModPを行えば良い。
 // ------------------
-
 /**
  * bigint を F_p の正準表現に変換（常に 0 ≦ n < p）
  */
@@ -170,7 +167,7 @@ export const inverseOfModP = (a: bigint, p: bigint): bigint => {
 /**
  * 楕円曲線上の点PとQを加算（加算/倍加とも対応）
  */
-export function pointAdd(P: Point, Q: Point): Point {
+export const pointAdd = (P: Point, Q: Point): Point => {
   const [x1, y1] = P;
   const [x2, y2] = Q;
 
@@ -188,12 +185,12 @@ export function pointAdd(P: Point, Q: Point): Point {
   const y3 = toBigintModP(lambda * (x1 - x3) - y1, modP);
 
   return [x3, y3];
-}
+};
 
 /**
  * 楕円曲線上の点 G にスカラー k をかける（k倍演算）
  */
-export function multiplyPointNTimes(k: bigint, G: Point): Point {
+export const multiplyPointNTimes = (k: bigint, G: Point): Point => {
   let R: Point | null = null;
   let addend = G;
 
@@ -206,4 +203,4 @@ export function multiplyPointNTimes(k: bigint, G: Point): Point {
   }
 
   return R!;
-}
+};
