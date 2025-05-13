@@ -29,13 +29,12 @@ import {
 const secp256k1 = require('secp256k1');
 
 describe('createMasterKeyBip32', () => {
-  it('should derive master key and chaincode', () => {
+  it('works same as library', () => {
     const seed = '000102030405060708090a0b0c0d0e0f';
     const seedBuf = hexToBuffer(seed);
     const wallet = ethers.HDNodeWallet.fromSeed(seedBuf);
     const actual = createMasterKeyBip32(seedBuf);
 
-    // ethers.js と同じ結果
     // buffer での比較が不慣れだったので文字列にして比較
     expect(bufferToHex(actual.key, true)).toEqual(wallet.privateKey);
     expect(bufferToHex(actual.chainCode, true)).toEqual(wallet.chainCode)
@@ -43,7 +42,7 @@ describe('createMasterKeyBip32', () => {
 });
 
 describe('selfmadeCKDpriv', () => {
-  it('should derive a hardened child key with static path', () => {
+  it('works same as library', () => {
     const seed = '000102030405060708090a0b0c0d0e0f';
     const seedBuf = hexToBuffer(seed);
     const wallet = ethers.HDNodeWallet.fromSeed(seedBuf);
@@ -64,7 +63,7 @@ describe('selfmadeCKDpriv', () => {
 });
 
 describe('selfmadeDeriveKey', () => {
-  it('should derive addresses', () => {
+  it('works same as library', () => {
     fc.assert(
       fc.property(
         fc.bigInt({ min: 2n ** 128n, max: 2n ** 512n - 1n }),
