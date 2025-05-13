@@ -7,7 +7,7 @@ import {
   ethereumAddressFromPrivKey,
   selfmadeDeriveKey,
 } from './hdwallet';
-import { multiplyGNTimesEc } from './test/libraryImp';
+import { multiplyGNTimesEc } from './testUse/libraryImp';
 
 import {
   changePathDict,
