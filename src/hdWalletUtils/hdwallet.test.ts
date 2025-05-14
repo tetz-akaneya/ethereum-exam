@@ -1,9 +1,10 @@
-import { ethers, Wallet } from 'ethers';
+import { ethers, HDNodeWallet, Wallet } from 'ethers';
 import * as fc from 'fast-check';
 import {
   createMasterKeyBip32,
   createPublicKey,
   ethereumAddressFromPrivKey,
+  mnemonicToSeed,
   selfmadeCKDpriv,
   selfmadeDeriveKey,
 } from './hdwallet';
@@ -12,6 +13,7 @@ import { multiplyGNTimesEc } from './testUse/libraryImp';
 import {
   changePathDict,
   coinTypeDict,
+  createMnemonic,
   genBipTypicalPath,
   purposeDict,
   typedKeys,
@@ -23,9 +25,11 @@ import {
   hexToBuffer,
   hexToUint8Array,
   multiplyPointNTimes,
+  uint8ArrayToHex,
 } from './convert';
 
 import secp256k1 from 'secp256k1';
+import { Mnemonic } from 'ethers';
 
 describe('createMasterKeyBip32', () => {
   it('works same as library', () => {
@@ -166,5 +170,26 @@ describe('createPublicKey', () => {
         expect(P1).toEqual(P2);
       }),
     );
+  });
+});
+
+describe('mnemonicToSeed', () => {
+  it('should derive correct seed from static mnemonic and passphrase', () => {
+    const mnemonic =
+      'breeze tackle yellow jazz lion east prison multiply senior struggle celery galaxy';
+    const passphrase = 'passphrase';
+
+    const seed = mnemonicToSeed(mnemonic, passphrase);
+    const libMnemonic = Mnemonic.fromPhrase(mnemonic, passphrase)
+    expect(uint8ArrayToHex(seed, true)).toEqual(libMnemonic.computeSeed());
+  });
+
+  it('should derive correct seed from random mnemonic and passphrase', () => {
+    const mnemonic = createMnemonic({ byteSize: 32 })
+    const passphrase = 'passphrase';
+
+    const seed = mnemonicToSeed(mnemonic, passphrase);
+    const libMnemonic = Mnemonic.fromPhrase(mnemonic, passphrase)
+    expect(uint8ArrayToHex(seed, true)).toEqual(libMnemonic.computeSeed());
   });
 });

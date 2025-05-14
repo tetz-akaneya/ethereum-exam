@@ -24,6 +24,9 @@ const hardenPath = (index: string | number) => {
   return `${index}'`;
 };
 
+/*
+ * アポストロフィ付きのpathは、[0, 2**31) の範囲
+ */
 export const genBipTypicalPath = (arg: {
   purpose: number;
   coinType: number;

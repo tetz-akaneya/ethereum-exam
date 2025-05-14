@@ -11,6 +11,7 @@ import {
   multiplyPointNTimes,
 } from './convert.js';
 import { HARDENED_OFFSET, CURVE_ORDER, G, Point, modP } from './constant.js';
+import { pbkdf2Sync } from 'crypto';
 
 // ----------------------
 // 自作のHDウォレット用関数
@@ -134,3 +135,35 @@ export const selfmadeDeriveKey = (arg: {
     address: ethereumAddressFromPrivKey(result.key),
   };
 };
+
+/**
+ * UTF-8 NFKD 正規化を行う
+ */
+const normalizeNfkd = (str: string): string => {
+  return str.normalize('NFKD');
+};
+
+/**
+ * ニーモニックからBIP-39準拠のシードを生成する
+ * @param mnemonic ニーモニック（12〜24語）
+ * @param passphrase パスフレーズ（任意、デフォルト空文字列）
+ * @returns 64バイトのシード（Uint8Array）
+ */
+export const mnemonicToSeed = (
+  mnemonic: string,
+  passphrase: string = ''
+): Uint8Array => {
+  const normalizedMnemonic = normalizeNfkd(mnemonic);
+  const normalizedSalt = 'mnemonic' + normalizeNfkd(passphrase);
+
+  const seed = pbkdf2Sync(
+    Buffer.from(normalizedMnemonic, 'utf8'),
+    Buffer.from(normalizedSalt, 'utf8'),
+    2048,
+    64,
+    'sha512'
+  );
+
+  return new Uint8Array(seed);
+};
+

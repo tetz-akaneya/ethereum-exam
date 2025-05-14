@@ -1,6 +1,6 @@
-import { parseEther, parseUnits, TransactionRequest, toBeArray } from 'ethers';
-import { decodeTx } from './decodeTx';
-import { signTransaction } from './sign';
+import { parseEther, parseUnits, TransactionRequest } from 'ethers';
+import { decodeTx } from './decodeTx.js';
+import { signTransaction } from './sign.js';
 
 // トランザクションデータ（オンライン側から取得し、オフラインに持ち込む）
 const testTxData: TransactionRequest = {
@@ -13,7 +13,6 @@ const testTxData: TransactionRequest = {
   maxFeePerGas: parseUnits('50', 'gwei'),
   data: '0x',
   // 1 for mainnet
-  // 5 for goerli
   // https://eips.ethereum.org/EIPS/eip-155
   // https://chainid.network/
   chainId: 1,

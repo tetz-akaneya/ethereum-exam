@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import path from 'path';
 import { deriveKey } from '../generateHdKey.js';
 import { signTransaction } from '../sign.js';
-import { ethers, TransactionLike, TransactionRequest } from 'ethers';
+import { Transaction, TransactionLike, TransactionRequest } from 'ethers';
 
 // ==============================
 // 定数
@@ -16,11 +16,19 @@ const defaultMode: ModeType = 'dryrun';
 // ==============================
 // 型定義
 // ==============================
-type OutputFormatType = 'file' | 'stdout';
-export type OutputFormatStatus = OutputFormatType | 'default' | 'invalid';
+type CommandOptionType = {
+  mode: ModeType;
+  dryrunSign: boolean;
+  outputFormat: OutputFormatType;
+  secretFile: string;
+  requestFile: string;
+};
 
 type ModeType = 'sign' | 'dryrun';
 type ModeStatus = ModeType | 'default' | 'invalid';
+
+type OutputFormatType = 'file' | 'stdout';
+export type OutputFormatStatus = OutputFormatType | 'default' | 'invalid';
 
 type ParamsType = ReturnType<typeof fetchTypedParams>;
 
@@ -42,14 +50,6 @@ type SecreteJsonType = {
   passphrase: string;
 };
 
-type CommandOptionType = {
-  mode: ModeType;
-  dryrunSign: boolean;
-  outputFormat: OutputFormatType;
-  secretFile: string;
-  requestFile: string;
-};
-
 type DryrunResult = {
   txData: TransactionRequest;
   signSuccess?: boolean;
@@ -60,7 +60,8 @@ type TxValidationResultType = {
   errorMessage?: string;
 };
 
-type ValidateSecretPathResult = 'notfound' | 'success' | 'prseerror';
+type ValidateSecretPathResult = 'not_found' | 'success' | 'perse_error';
+type OutputSubDir = 'dryrun' | 'tx';
 
 // ==============================
 // ユーティリティ関数
@@ -76,7 +77,7 @@ const formatDateYYYYMMDDHH = (date: Date): string => {
 };
 
 // 出力ファイルパスを構築
-const outputFilepath = (subdir: 'dryrun' | 'tx', unresolvedPath: string) => {
+const outputFilepath = (subdir: OutputSubDir, unresolvedPath: string) => {
   return path.resolve(outputDir, subdir, unresolvedPath);
 };
 
@@ -111,7 +112,6 @@ const readAndParseJsonPath = <T>(pathStr: string): T => {
 // ==============================
 // バリデーション関連
 // ==============================
-
 // --output-format を検証
 export const getOutputFormatStatus = (
   outputFormat?: OutputFormatType,
@@ -154,13 +154,13 @@ const exitOnValidateResult = (
 // シークレットファイルのパスを検証
 const validateSecretPath = (pathStr: string): ValidateSecretPathResult => {
   const exists = existsSync(path.resolve(pathStr));
-  if (!exists) return 'notfound';
+  if (!exists) return 'not_found';
 
   try {
     JSON.parse(readFileSync(path.resolve(pathStr), 'utf8'));
     return 'success';
   } catch {
-    return 'prseerror';
+    return 'perse_error';
   }
 };
 
@@ -170,7 +170,7 @@ const exitOnValidateSecretFile = (
 ) => {
   if (result === 'success') return;
   console.log(
-    result === 'notfound'
+    result === 'not_found'
       ? 'Failed to read the secret file'
       : 'Failed to parse the secret file as JSON',
   );
@@ -182,7 +182,7 @@ const validateTransaction = (
   txData: TransactionRequest,
 ): TxValidationResultType => {
   try {
-    ethers.Transaction.from(txData as TransactionLike<string>);
+    Transaction.from(txData as TransactionLike<string>);
     return { result: 'success' };
   } catch (e: any) {
     return { result: 'failure', errorMessage: e.message };
@@ -295,6 +295,7 @@ const runAddressCommand = async (options: CommandOptionType) => {
   exitOnValidateResult(validateArgumentFormat(options));
   const params = fetchTypedParams(options);
   exitOnValidateSecretFile(validateSecretPath(params.scretfilePath));
+
   const secret = readAndParseJsonPath<SecreteJsonType>(params.scretfilePath);
   const txData = createTxData(params.requestFile);
   const txValidationResult = validateTransaction(txData);

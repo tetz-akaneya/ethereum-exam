@@ -7,10 +7,14 @@ import { Point, modP } from './constant.js';
 /**
  * Uint8Array → Hex文字列（小文字, プレフィックスなし）
  */
-export const uint8ArrayToHex = (arrayBuffer: Uint8Array): string =>
-  Array.from(arrayBuffer)
+export const uint8ArrayToHex = (arrayBuffer: Uint8Array, prefix = false): string => {
+  const hex = Array.from(arrayBuffer)
     .map((i) => i.toString(16).padStart(2, '0'))
     .join('');
+  const prefixStr = prefix ? '0x' : ''
+
+  return prefixStr + hex
+}
 
 /**
  * bigint → number（安全な範囲内のみ）

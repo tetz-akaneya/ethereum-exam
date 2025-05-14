@@ -17,7 +17,6 @@ program
     console.log(`Hello, ${options.name || 'world'}!`);
   });
 
-const addressCommand = createSignCommand();
-program.addCommand(addressCommand);
+program.addCommand(createSignCommand());
 
 program.parse(process.argv);
