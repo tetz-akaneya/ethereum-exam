@@ -1,7 +1,6 @@
 import { parseEther, parseUnits, TransactionRequest, toBeArray } from 'ethers';
 import { decodeTx } from './decodeTx';
 import { signTransaction } from './sign';
-import fc from 'fast-check';
 
 // トランザクションデータ（オンライン側から取得し、オフラインに持ち込む）
 const testTxData: TransactionRequest = {

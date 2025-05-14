@@ -9,8 +9,8 @@ import {
   hexToBigInt,
   toBigintModP,
   multiplyPointNTimes,
-} from './convert';
-import { HARDENED_OFFSET, CURVE_ORDER, G, Point, modP } from './constant';
+} from './convert.js';
+import { HARDENED_OFFSET, CURVE_ORDER, G, Point, modP } from './constant.js';
 
 // ----------------------
 // 自作のHDウォレット用関数

@@ -5,134 +5,24 @@ import { deriveKey } from '../generateHdKey.js';
 import { signTransaction } from '../sign.js';
 import { ethers, TransactionLike, TransactionRequest } from 'ethers';
 
-const formatDateYYYYMMDDHH = (date: Date): string => {
-  const yyyy = date.getFullYear();
-  const MM = String(date.getMonth() + 1).padStart(2, '0'); // 月は0-indexed
-  const dd = String(date.getDate()).padStart(2, '0');
-  const HH = String(date.getHours()).padStart(2, '0');
-  return `${yyyy}${MM}${dd}${HH}`;
-};
-
+// ==============================
+// 定数
+// ==============================
 const outputDir = 'output';
-const outputFilepath = (subdir: 'dryrun' | 'tx', unresolvedPath: string) => {
-  return path.resolve(outputDir, subdir, unresolvedPath);
-};
+const defaultSecretFile = 'secret_params.json';
+const defaultOutputFormat: OutputFormatType = 'stdout';
+const defaultMode: ModeType = 'dryrun';
+
+// ==============================
+// 型定義
+// ==============================
 type OutputFormatType = 'file' | 'stdout';
 export type OutputFormatStatus = OutputFormatType | 'default' | 'invalid';
 
-export const getOutputFormatStatus = (
-  outputFormat?: OutputFormatType,
-): OutputFormatStatus => {
-  if (outputFormat === undefined) {
-    return 'default';
-  } else if (outputFormat === 'file') {
-    return outputFormat;
-  } else if (outputFormat === 'stdout') {
-    return outputFormat;
-  } else {
-    return 'invalid';
-  }
-};
-
 type ModeType = 'sign' | 'dryrun';
 type ModeStatus = ModeType | 'default' | 'invalid';
-const getModeStatus = (mode?: ModeType): ModeStatus => {
-  if (mode === undefined) {
-    return 'default';
-  } else if (mode === 'sign') {
-    return mode;
-  } else if (mode === 'dryrun') {
-    return mode;
-  } else {
-    return 'invalid';
-  }
-};
 
-const stringifyJson = (data: any) => {
-  return JSON.stringify(
-    data,
-    (_, value) => (typeof value === 'bigint' ? value.toString() : value),
-    2,
-  );
-};
-
-const getOutputSubDirname = (mode: ModeType) => {
-  if (mode === 'dryrun') {
-    return 'dryrun';
-  } else if (mode === 'sign') {
-    return 'tx';
-  } else {
-    throw new Error('TS type error.');
-  }
-};
-
-export const createDirIfNotExists = (dirPath: string): void => {
-  if (!existsSync(dirPath)) {
-    mkdirSync(dirPath, { recursive: true });
-  }
-};
-
-const defaultSecretFile = 'secret_params.json';
-const defaultOutputFormat: OutputFormatType = 'stdout';
-const validateArgumentFormat = (options: CommandOptionType) => {
-  const outputFormatStatus = getOutputFormatStatus(options.outputFormat);
-  const modeStatus = getModeStatus(options.mode);
-
-  return {
-    options,
-    outputFormatStatus,
-    modeStatus,
-  };
-};
-
-const exitOnValidateResult = (
-  arg: ReturnType<typeof validateArgumentFormat>,
-) => {
-  if (arg.outputFormatStatus === 'invalid') {
-    console.error(
-      `Invalid output-format. received: ${arg.options.outputFormat}.`,
-    );
-    process.exit(1);
-  } else if (arg.modeStatus === 'invalid') {
-    console.error(`Invalid mode. received: ${arg.options.mode}.`);
-    process.exit(1);
-  }
-};
-
-const defaultMode: ModeType = 'dryrun';
 type ParamsType = ReturnType<typeof fetchTypedParams>;
-const fetchTypedParams = (options: Partial<CommandOptionType>) => {
-  const now = new Date();
-  const outputFormat: OutputFormatType =
-    getOutputFormatStatus(options.outputFormat) === 'default'
-      ? defaultOutputFormat
-      : options.outputFormat!;
-  const mode: ModeType =
-    getModeStatus(options.mode) === 'default' ? defaultMode : options.mode!;
-  const secretFileOption = options.secretFile || defaultSecretFile;
-
-  const scretfilePath = path.resolve(secretFileOption);
-  const filename = formatDateYYYYMMDDHH(now);
-  const outputSubDirname = getOutputSubDirname(mode);
-  const outputPath = outputFilepath(outputSubDirname, filename + '.json');
-  const dryrunSign = !!options.dryRunSign;
-
-  const requestFile = path.resolve(options.requestFile!);
-
-  return {
-    now,
-    mode,
-    outputFormat,
-    scretfilePath,
-    requestFile,
-    dryrunSign,
-    outputPath,
-  };
-};
-
-const readAndParseJsonPath = <T>(pathStr: string): T => {
-  return JSON.parse(readFileSync(pathStr, 'utf8'));
-};
 
 type RequestFileJsonType = {
   maxFeePerGas: string;
@@ -144,54 +34,6 @@ type RequestFileJsonType = {
   chainId: number;
   nonce: number;
   type: number;
-};
-
-type ValidateSecretPathResult = 'notfound' | 'success' | 'prseerror';
-const validateSecretPath = (pathStr: string): ValidateSecretPathResult => {
-  const exists = existsSync(path.resolve(pathStr));
-  if (!exists) {
-    return 'notfound';
-  }
-
-  try {
-    JSON.parse(readFileSync(path.resolve(pathStr), 'utf8'));
-    return 'success';
-  } catch (e: any) {
-    return 'prseerror';
-  }
-};
-
-const validateTransaction = (
-  txData: TransactionRequest,
-): TxValidationResultType => {
-  try {
-    ethers.Transaction.from(txData as TransactionLike<string>);
-
-    return {
-      result: 'success',
-    };
-  } catch (e: any) {
-    return {
-      result: 'failure',
-      errorMessage: e.message,
-    };
-  }
-};
-
-const exitOnValidateSecretFile = (
-  result: ReturnType<typeof validateSecretPath>,
-) => {
-  if (result === 'success') {
-    return;
-  }
-
-  if (result === 'notfound') {
-    console.log('Failed to read the secret file');
-  } else if (result === 'prseerror') {
-    console.log('Failed to parse the secret file as JSON');
-  }
-
-  process.exit(1);
 };
 
 type SecreteJsonType = {
@@ -212,14 +54,168 @@ type DryrunResult = {
   txData: TransactionRequest;
   signSuccess?: boolean;
 };
+
 type TxValidationResultType = {
   result: 'success' | 'failure';
   errorMessage?: string;
 };
 
+type ValidateSecretPathResult = 'notfound' | 'success' | 'prseerror';
+
+// ==============================
+// ユーティリティ関数
+// ==============================
+
+// 日付を "YYYYMMDDHH" 形式で整形
+const formatDateYYYYMMDDHH = (date: Date): string => {
+  const yyyy = date.getFullYear();
+  const MM = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  const HH = String(date.getHours()).padStart(2, '0');
+  return `${yyyy}${MM}${dd}${HH}`;
+};
+
+// 出力ファイルパスを構築
+const outputFilepath = (subdir: 'dryrun' | 'tx', unresolvedPath: string) => {
+  return path.resolve(outputDir, subdir, unresolvedPath);
+};
+
+// JSON.stringifyでBigInt対応＆整形
+const stringifyJson = (data: any) => {
+  return JSON.stringify(
+    data,
+    (_, value) => (typeof value === 'bigint' ? value.toString() : value),
+    2,
+  );
+};
+
+// 出力先ディレクトリ名を取得
+const getOutputSubDirname = (mode: ModeType) => {
+  if (mode === 'dryrun') return 'dryrun';
+  if (mode === 'sign') return 'tx';
+  throw new Error('TS type error.');
+};
+
+// ディレクトリが存在しない場合は作成
+export const createDirIfNotExists = (dirPath: string): void => {
+  if (!existsSync(dirPath)) {
+    mkdirSync(dirPath, { recursive: true });
+  }
+};
+
+// JSONファイルの読み込み＋パース
+const readAndParseJsonPath = <T>(pathStr: string): T => {
+  return JSON.parse(readFileSync(pathStr, 'utf8'));
+};
+
+// ==============================
+// バリデーション関連
+// ==============================
+
+// --output-format を検証
+export const getOutputFormatStatus = (
+  outputFormat?: OutputFormatType,
+): OutputFormatStatus => {
+  if (outputFormat === undefined) return 'default';
+  if (outputFormat === 'file' || outputFormat === 'stdout') return outputFormat;
+  return 'invalid';
+};
+
+// --mode を検証
+const getModeStatus = (mode?: ModeType): ModeStatus => {
+  if (mode === undefined) return 'default';
+  if (mode === 'sign' || mode === 'dryrun') return mode;
+  return 'invalid';
+};
+
+// コマンドオプションを検証し、statusを返す
+const validateArgumentFormat = (options: CommandOptionType) => {
+  const outputFormatStatus = getOutputFormatStatus(options.outputFormat);
+  const modeStatus = getModeStatus(options.mode);
+  return { options, outputFormatStatus, modeStatus };
+};
+
+// 検証結果が invalid なら強制終了
+const exitOnValidateResult = (
+  arg: ReturnType<typeof validateArgumentFormat>,
+) => {
+  if (arg.outputFormatStatus === 'invalid') {
+    console.error(`Invalid output-format. received: ${arg.options.outputFormat}.`);
+    process.exit(1);
+  }
+  if (arg.modeStatus === 'invalid') {
+    console.error(`Invalid mode. received: ${arg.options.mode}.`);
+    process.exit(1);
+  }
+};
+
+// シークレットファイルのパスを検証
+const validateSecretPath = (pathStr: string): ValidateSecretPathResult => {
+  const exists = existsSync(path.resolve(pathStr));
+  if (!exists) return 'notfound';
+
+  try {
+    JSON.parse(readFileSync(path.resolve(pathStr), 'utf8'));
+    return 'success';
+  } catch {
+    return 'prseerror';
+  }
+};
+
+// シークレットファイルのバリデーションに失敗したら終了
+const exitOnValidateSecretFile = (
+  result: ReturnType<typeof validateSecretPath>,
+) => {
+  if (result === 'success') return;
+  console.log(
+    result === 'notfound'
+      ? 'Failed to read the secret file'
+      : 'Failed to parse the secret file as JSON',
+  );
+  process.exit(1);
+};
+
+// トランザクションデータのバリデーション
+const validateTransaction = (
+  txData: TransactionRequest,
+): TxValidationResultType => {
+  try {
+    ethers.Transaction.from(txData as TransactionLike<string>);
+    return { result: 'success' };
+  } catch (e: any) {
+    return { result: 'failure', errorMessage: e.message };
+  }
+};
+
+// ==============================
+// パラメータ解析・作成
+// ==============================
+
+// 入力オプションに基づいて必要な情報を構築
+const fetchTypedParams = (options: Partial<CommandOptionType>) => {
+  const now = new Date();
+  const outputFormat: OutputFormatType =
+    getOutputFormatStatus(options.outputFormat) === 'default'
+      ? defaultOutputFormat
+      : options.outputFormat!;
+  const mode: ModeType =
+    getModeStatus(options.mode) === 'default' ? defaultMode : options.mode!;
+  const secretFileOption = options.secretFile || defaultSecretFile;
+
+  return {
+    now,
+    mode,
+    outputFormat,
+    scretfilePath: path.resolve(secretFileOption),
+    requestFile: path.resolve(options.requestFile!),
+    dryrunSign: !!options.dryRunSign,
+    outputPath: outputFilepath(getOutputSubDirname(mode), formatDateYYYYMMDDHH(now) + '.json'),
+  };
+};
+
+// JSONファイルからTransactionRequestを生成
 export const createTxData = (requestFile: string): TransactionRequest => {
   const requestData = readAndParseJsonPath<RequestFileJsonType>(requestFile);
-
   return {
     maxFeePerGas: BigInt(requestData.maxFeePerGas),
     maxPriorityFeePerGas: BigInt(requestData.maxPriorityFeePerGas),
@@ -233,6 +229,11 @@ export const createTxData = (requestFile: string): TransactionRequest => {
   };
 };
 
+// ==============================
+// 出力処理
+// ==============================
+
+// 出力形式に応じた出力
 const onOutputFormat = (arg: {
   outputFormat: OutputFormatType;
   params: ParamsType;
@@ -247,6 +248,7 @@ const onOutputFormat = (arg: {
   }
 };
 
+// dryrun モード時の出力
 const onDryrunMode = (arg: {
   txData: TransactionRequest;
   params: ParamsType;
@@ -254,48 +256,32 @@ const onDryrunMode = (arg: {
   signSuccess?: boolean;
 }) => {
   const dryrunResult: DryrunResult = { txData: arg.txData };
-  if (arg.signSuccess != null) {
-    dryrunResult.signSuccess = arg.signSuccess;
-  }
-
-  onOutputFormat({
-    outputFormat: arg.params.outputFormat,
-    params: arg.params,
-    data: dryrunResult,
-  });
+  if (arg.signSuccess != null) dryrunResult.signSuccess = arg.signSuccess;
+  onOutputFormat({ outputFormat: arg.params.outputFormat, params: arg.params, data: dryrunResult });
 };
 
+// sign モード時の出力
 const onSignMode = (arg: { params: ParamsType; signedTransaction: string }) => {
-  onOutputFormat({
-    outputFormat: arg.params.outputFormat,
-    params: arg.params,
-    data: arg.signedTransaction,
-  });
+  onOutputFormat({ outputFormat: arg.params.outputFormat, params: arg.params, data: arg.signedTransaction });
 };
 
+// ==============================
+// コマンド実行処理
+// ==============================
+
+// メインの実行処理
 const runAddressCommand = async (options: CommandOptionType) => {
-  // 引数のチェックおよび読み込み
   exitOnValidateResult(validateArgumentFormat(options));
   const params = fetchTypedParams(options);
-
-  // secret file が読み込めるかのチェックおよび読み込み
   exitOnValidateSecretFile(validateSecretPath(params.scretfilePath));
   const secret = readAndParseJsonPath<SecreteJsonType>(params.scretfilePath);
-
-  // request fileのデータをチェックおよび読み込み(署名前)
   const txData = createTxData(params.requestFile);
   const txValidationResult = validateTransaction(txData);
 
-  // 署名なしdryrunの場合はここまで
   if (params.mode === 'dryrun' && !params.dryrunSign) {
-    return onDryrunMode({
-      txData,
-      txValidationResult,
-      params,
-    });
+    return onDryrunMode({ txData, txValidationResult, params });
   }
 
-  // 実際に署名を行う
   const key = deriveKey({
     mnemonicString: secret.mnemonic,
     passphrase: secret.passphrase,
@@ -308,24 +294,28 @@ const runAddressCommand = async (options: CommandOptionType) => {
   });
 
   if (params.mode === 'dryrun') {
-    onDryrunMode({
+    return onDryrunMode({
       txData,
-      params,
       txValidationResult,
+      params,
       signSuccess: true,
     });
-    return;
-  } else if (params.mode === 'sign') {
-    onSignMode({
+  }
+
+  if (params.mode === 'sign') {
+    return onSignMode({
       signedTransaction,
       params,
     });
-    return;
   }
 };
 
+// ==============================
+// CLIコマンドの登録
+// ==============================
 export const createSignCommand = () => {
   const command = new Command('sign');
+
   command
     .description('signs transaction. Defaults to dry-run.')
     .option('--mode <string>', 'dryrun | sign')

@@ -7,7 +7,7 @@ import {
   genBipTypicalPath,
   purposeDict,
   typedKeys,
-} from './generateHdKey';
+} from './generateHdKey.js';
 
 const passphrase = 'passphrase';
 

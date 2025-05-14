@@ -1,6 +1,7 @@
 import eslintPluginPrettier from 'eslint-plugin-prettier';
 import eslintConfigPrettier from 'eslint-config-prettier';
 import tseslint from 'typescript-eslint';
+import eslintPluginImport from 'eslint-plugin-import';
 
 export default tseslint.config(
   {
@@ -14,6 +15,7 @@ export default tseslint.config(
     plugins: {
       '@typescript-eslint': tseslint.plugin,
       prettier: eslintPluginPrettier,
+      import: eslintPluginImport,
     },
     rules: {
       // TypeScriptルール例
@@ -32,7 +34,20 @@ export default tseslint.config(
           ExportDeclaration: { multiline: true, minProperties: 2 },
         },
       ],
+      'import/extensions': ['error', 'always', {
+        js: 'always',
+        ts: 'never',
+        tsx: 'never',
+      }],
     },
+    settings: {
+      'import/resolver': {
+        node: {
+          extensions: ['.js', '.ts', '.tsx'],
+        },
+      },
+    },
+
   },
   eslintConfigPrettier,
 );

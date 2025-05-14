@@ -1,4 +1,4 @@
-import { Point, modP } from './constant';
+import { Point, modP } from './constant.js';
 
 // ----------------------
 // Convert 関数群
