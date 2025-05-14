@@ -1,6 +1,6 @@
-#!/usr/bin/env node
+#!/usr/bin/env ts-node
 import { Command } from 'commander';
-import { createAddressCommand } from './cli/address.js';
+import { createSignCommand } from './cli/signCommand.js';
 
 const program = new Command();
 
@@ -17,7 +17,7 @@ program
     console.log(`Hello, ${options.name || 'world'}!`);
   });
 
-const addressCommand = createAddressCommand();
+const addressCommand = createSignCommand();
 program.addCommand(addressCommand);
 
 program.parse(process.argv);

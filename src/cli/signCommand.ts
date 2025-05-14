@@ -1,8 +1,8 @@
 import { Command } from 'commander';
-import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import path from 'path';
-import { deriveKey } from '../generateHdKey';
-import { signTransaction } from '../sign';
+import { deriveKey } from '../generateHdKey.js';
+import { signTransaction } from '../sign.js';
 import { ethers, TransactionLike, TransactionRequest } from 'ethers';
 
 const formatDateYYYYMMDDHH = (date: Date): string => {
@@ -66,6 +66,12 @@ const getOutputSubDirname = (mode: ModeType) => {
   }
 };
 
+export const createDirIfNotExists = (dirPath: string): void => {
+  if (!existsSync(dirPath)) {
+    mkdirSync(dirPath, { recursive: true });
+  }
+};
+
 const defaultSecretFile = 'secret_params.json';
 const defaultOutputFormat: OutputFormatType = 'stdout';
 const validateArgumentFormat = (options: CommandOptionType) => {
@@ -108,7 +114,7 @@ const fetchTypedParams = (options: Partial<CommandOptionType>) => {
   const scretfilePath = path.resolve(secretFileOption);
   const filename = formatDateYYYYMMDDHH(now);
   const outputSubDirname = getOutputSubDirname(mode);
-  const outputPath = outputFilepath(outputSubDirname, filename);
+  const outputPath = outputFilepath(outputSubDirname, filename + '.json');
   const dryrunSign = !!options.dryRunSign;
 
   const requestFile = path.resolve(options.requestFile!);
@@ -140,8 +146,7 @@ type RequestFileJsonType = {
   type: number;
 };
 
-type ValidateSecretPathResult =
-  | 'notfound' | 'success' | 'prseerror'
+type ValidateSecretPathResult = 'notfound' | 'success' | 'prseerror';
 const validateSecretPath = (pathStr: string): ValidateSecretPathResult => {
   const exists = existsSync(path.resolve(pathStr));
   if (!exists) {
@@ -150,7 +155,7 @@ const validateSecretPath = (pathStr: string): ValidateSecretPathResult => {
 
   try {
     JSON.parse(readFileSync(path.resolve(pathStr), 'utf8'));
-    return 'success'
+    return 'success';
   } catch (e: any) {
     return 'prseerror';
   }
@@ -188,7 +193,6 @@ const exitOnValidateSecretFile = (
 
   process.exit(1);
 };
-
 
 type SecreteJsonType = {
   mnemonic: string;
@@ -232,12 +236,13 @@ export const createTxData = (requestFile: string): TransactionRequest => {
 const onOutputFormat = (arg: {
   outputFormat: OutputFormatType;
   params: ParamsType;
-  data: string;
+  data: Object;
 }) => {
   if (arg.params.outputFormat === 'stdout') {
     console.log(arg.data);
   } else if (arg.params.outputFormat === 'file') {
     console.log(`Written to ${arg.params.outputPath}`);
+    createDirIfNotExists(path.dirname(arg.params.outputPath));
     writeFileSync(arg.params.outputPath, stringifyJson(arg.data));
   }
 };
@@ -256,7 +261,7 @@ const onDryrunMode = (arg: {
   onOutputFormat({
     outputFormat: arg.params.outputFormat,
     params: arg.params,
-    data: stringifyJson(dryrunResult),
+    data: dryrunResult,
   });
 };
 
@@ -309,20 +314,19 @@ const runAddressCommand = async (options: CommandOptionType) => {
       txValidationResult,
       signSuccess: true,
     });
-    return
+    return;
   } else if (params.mode === 'sign') {
     onSignMode({
       signedTransaction,
       params,
     });
-    return
+    return;
   }
 };
 
-export const createAddressCommand = () => {
-  const command = new Command('address');
+export const createSignCommand = () => {
+  const command = new Command('sign');
   command
-    .command('sign')
     .description('signs transaction. Defaults to dry-run.')
     .option('--mode <string>', 'dryrun | sign')
     .option('--dryrun-sign', 'Validate params by sign. Only works when dry-run')

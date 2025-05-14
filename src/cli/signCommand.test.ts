@@ -1,6 +1,10 @@
-import { TransactionRequest } from "ethers";
-import path from "path";
-import { createTxData, getOutputFormatStatus, OutputFormatStatus } from "./address";
+import { TransactionRequest } from 'ethers';
+import path from 'path';
+import {
+  createTxData,
+  getOutputFormatStatus,
+  OutputFormatStatus,
+} from './signCommand.js';
 
 describe('createTxData (with real file)', () => {
   it('creates transaction from actual JSON file', () => {
@@ -24,7 +28,9 @@ describe('createTxData (with real file)', () => {
 
 describe('getOutputFormatStatus', () => {
   it('returns "default" when undefined is passed', () => {
-    expect(getOutputFormatStatus(undefined)).toBe<OutputFormatStatus>('default');
+    expect(getOutputFormatStatus(undefined)).toBe<OutputFormatStatus>(
+      'default',
+    );
   });
 
   it('returns "file" when "file" is passed', () => {
@@ -36,6 +42,8 @@ describe('getOutputFormatStatus', () => {
   });
 
   it('returns "invalid" when an unknown string is passed', () => {
-    expect(getOutputFormatStatus()).toBe<OutputFormatStatus>('invalid');
+    expect(getOutputFormatStatus('' as any)).toBe<OutputFormatStatus>(
+      'invalid',
+    );
   });
 });

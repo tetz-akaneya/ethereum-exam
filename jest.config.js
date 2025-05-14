@@ -5,4 +5,9 @@ export default {
     '^.+\.tsx?$': ['ts-jest', {}],
   },
   roots: ['<rootDir>/src'],
+  moduleNameMapper: {
+
+    '^src/(.*)\\.js$': '<rootDir>/src/$1.ts',
+
+  },
 };
