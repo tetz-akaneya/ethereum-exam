@@ -221,6 +221,7 @@ const fetchTypedParams = (options: Partial<CommandOptionType>) => {
 // JSONファイルからTransactionRequestを生成
 export const createTxData = (requestFile: string): TransactionRequest => {
   const requestData = readAndParseJsonPath<RequestFileJsonType>(requestFile);
+
   return {
     maxFeePerGas: BigInt(requestData.maxFeePerGas),
     maxPriorityFeePerGas: BigInt(requestData.maxPriorityFeePerGas),
