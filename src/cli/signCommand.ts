@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import path from 'path';
-import { deriveKey } from '../generateHdKey.js';
+import { deriveKeyFromMnemonic } from '../generateHdKey.js';
 import { signTransaction } from '../sign.js';
 import { Transaction, TransactionLike, TransactionRequest } from 'ethers';
 
@@ -304,7 +304,7 @@ const runAddressCommand = async (options: CommandOptionType) => {
     return onDryrunMode({ txData, txValidationResult, params });
   }
 
-  const key = deriveKey({
+  const key = deriveKeyFromMnemonic({
     mnemonicString: secret.mnemonic,
     passphrase: secret.passphrase,
     path: secret.derivePath,

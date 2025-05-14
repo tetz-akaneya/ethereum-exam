@@ -129,7 +129,10 @@ export const selfmadeDeriveKey = (arg: {
     return selfmadeCKDpriv(prev.key, prev.chainCode, index);
   }, I);
 
+  const publicKey = createPublicKey(result.key, true);
+
   return {
+    publicKey,
     key: result.key,
     chainCode: result.chainCode,
     address: ethereumAddressFromPrivKey(result.key),
@@ -151,7 +154,7 @@ const normalizeNfkd = (str: string): string => {
  */
 export const mnemonicToSeed = (
   mnemonic: string,
-  passphrase: string = ''
+  passphrase: string = '',
 ): Uint8Array => {
   const normalizedMnemonic = normalizeNfkd(mnemonic);
   const normalizedSalt = 'mnemonic' + normalizeNfkd(passphrase);
@@ -161,9 +164,8 @@ export const mnemonicToSeed = (
     Buffer.from(normalizedSalt, 'utf8'),
     2048,
     64,
-    'sha512'
+    'sha512',
   );
 
   return new Uint8Array(seed);
 };
-

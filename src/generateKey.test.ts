@@ -3,8 +3,8 @@ import {
   changePathDict,
   coinTypeDict,
   createMnemonic,
-  deriveKey,
-  genBipTypicalPath,
+  deriveKeyFromMnemonic,
+  genBip44Path,
   purposeDict,
   typedKeys,
 } from './generateHdKey.js';
@@ -13,11 +13,11 @@ const passphrase = 'passphrase';
 
 describe('deriveKey', () => {
   it('should derive correct key from static mnemonic', () => {
-    const key = deriveKey({
+    const key = deriveKeyFromMnemonic({
       mnemonicString:
         'breeze tackle yellow jazz lion east prison multiply senior struggle celery galaxy',
       passphrase,
-      path: genBipTypicalPath({
+      path: genBip44Path({
         purpose: purposeDict.BIP44,
         coinType: coinTypeDict.Ethereum,
         account: 0,
@@ -27,7 +27,7 @@ describe('deriveKey', () => {
     });
 
     expect(key).toEqual({
-      address: '0xe3c8468a41B17cCFB37324CcA0577b9463aD860B',
+      address: '0xe3c8468a41b17ccfb37324cca0577b9463ad860b',
       privateKey:
         '0x27e3b75b734ef80adfcddc1e94ba99000cb11fe7b3c4c0efd8e1defba158042f',
       publicKey:
@@ -37,10 +37,10 @@ describe('deriveKey', () => {
 
   it('should derive key from randomly generated mnemonic', () => {
     const mnemonicString = createMnemonic({ byteSize: 32 });
-    const key = deriveKey({
+    const key = deriveKeyFromMnemonic({
       mnemonicString,
       passphrase,
-      path: genBipTypicalPath({
+      path: genBip44Path({
         purpose: purposeDict.BIP44,
         coinType: coinTypeDict.Ethereum,
         account: 0,
@@ -56,7 +56,7 @@ describe('deriveKey', () => {
 });
 
 describe('genBipTypicalPath', () => {
-  it('should generate correct BIP44 path format', () => {
+  it('should generate correct BIP44 path format for random path', () => {
     fc.assert(
       fc.property(
         fc.constantFrom(...typedKeys(purposeDict)),
@@ -65,7 +65,7 @@ describe('genBipTypicalPath', () => {
         fc.constantFrom(...typedKeys(changePathDict)),
         fc.integer({ min: 0, max: 2 ** 31 - 1 }),
         (purposeKey, coinTypeKey, account, changeKey, index) => {
-          const result = genBipTypicalPath({
+          const result = genBip44Path({
             purpose: purposeDict[purposeKey],
             coinType: coinTypeDict[coinTypeKey],
             account,

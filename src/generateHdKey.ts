@@ -1,4 +1,13 @@
-import { HDNodeWallet, Mnemonic, randomBytes } from 'ethers';
+import { Mnemonic, randomBytes } from 'ethers';
+import {
+  mnemonicToSeed,
+  selfmadeDeriveKey as deriveKeyFromSeed,
+} from './hdWalletUtils/hdwallet.js';
+import {
+  bufferToHex,
+  uint8ArrayToBuffer,
+  uint8ArrayToHex,
+} from './hdWalletUtils/convert.js';
 
 type AllowedCoinType = 'Ethereum';
 type AllowedPurpose = 'BIP44';
@@ -27,7 +36,7 @@ const hardenPath = (index: string | number) => {
 /*
  * アポストロフィ付きのpathは、[0, 2**31) の範囲
  */
-export const genBipTypicalPath = (arg: {
+export const genBip44Path = (arg: {
   purpose: number;
   coinType: number;
   account: number;
@@ -44,29 +53,35 @@ export const genBipTypicalPath = (arg: {
   ].join('/');
 };
 
-// ニーモニック、パスフレーズからHDウォレットができるので、任意のpathのアドレスを導出する。
-export const deriveKey = (arg: {
+/*
+ * ニーモニック、パスフレーズからHDウォレットができるので、任意のpathのアドレスを導出する。
+ */
+export const deriveKeyFromMnemonic = (arg: {
   mnemonicString: string;
   passphrase: string;
   path: string;
 }) => {
-  const mnemonic = Mnemonic.fromPhrase(arg.mnemonicString, arg.passphrase);
+  const seed = mnemonicToSeed(arg.mnemonicString, arg.passphrase);
+  const seedBuf = uint8ArrayToBuffer(seed);
 
-  const seed = mnemonic.computeSeed();
-  const parentWallet = HDNodeWallet.fromSeed(seed);
-
-  const wallet = parentWallet.derivePath(arg.path);
+  const wallet = deriveKeyFromSeed({
+    seed: seedBuf,
+    passphrase: arg.passphrase,
+    path: arg.path,
+  });
 
   return {
-    publicKey: wallet.publicKey,
-    privateKey: wallet.privateKey,
+    publicKey: uint8ArrayToHex(wallet.publicKey, true),
+    privateKey: bufferToHex(wallet.key, true),
     address: wallet.address,
   };
 };
 
-// mnemonic を作る
-// 32byteが推奨
-// 長さは合っているが、コールドウォレットのニーモニックのランダム性はもっと慎重に決めるべき
+/*
+ * mnemonic を作る
+ * 32byteが推奨。これだけはライブラリに依存することにする。
+ * 長さは合っているが、コールドウォレットのニーモニックのランダム性はもっと慎重に決めるべき
+ */
 export const createMnemonic = (arg: { byteSize: number }) => {
   if (arg.byteSize < 31) {
     throw new Error('insecure byte size');

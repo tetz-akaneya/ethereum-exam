@@ -14,7 +14,7 @@ import {
   changePathDict,
   coinTypeDict,
   createMnemonic,
-  genBipTypicalPath,
+  genBip44Path,
   purposeDict,
   typedKeys,
 } from '../generateHdKey';
@@ -92,7 +92,7 @@ describe('selfmadeDeriveKey', () => {
         fc.constantFrom(...typedKeys(changePathDict)),
         fc.integer({ min: 0, max: 2 ** 31 - 1 }),
         (seedNum, purposeKey, coinTypeKey, account, changeKey, index) => {
-          const generatedPath = genBipTypicalPath({
+          const generatedPath = genBip44Path({
             purpose: purposeDict[purposeKey],
             coinType: coinTypeDict[coinTypeKey],
             account,
@@ -180,16 +180,16 @@ describe('mnemonicToSeed', () => {
     const passphrase = 'passphrase';
 
     const seed = mnemonicToSeed(mnemonic, passphrase);
-    const libMnemonic = Mnemonic.fromPhrase(mnemonic, passphrase)
+    const libMnemonic = Mnemonic.fromPhrase(mnemonic, passphrase);
     expect(uint8ArrayToHex(seed, true)).toEqual(libMnemonic.computeSeed());
   });
 
   it('should derive correct seed from random mnemonic and passphrase', () => {
-    const mnemonic = createMnemonic({ byteSize: 32 })
+    const mnemonic = createMnemonic({ byteSize: 32 });
     const passphrase = 'passphrase';
 
     const seed = mnemonicToSeed(mnemonic, passphrase);
-    const libMnemonic = Mnemonic.fromPhrase(mnemonic, passphrase)
+    const libMnemonic = Mnemonic.fromPhrase(mnemonic, passphrase);
     expect(uint8ArrayToHex(seed, true)).toEqual(libMnemonic.computeSeed());
   });
 });
