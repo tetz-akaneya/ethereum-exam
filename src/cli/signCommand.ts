@@ -44,7 +44,7 @@ type SecreteJsonType = {
 
 type CommandOptionType = {
   mode: ModeType;
-  dryRunSign: boolean;
+  dryrunSign: boolean;
   outputFormat: OutputFormatType;
   secretFile: string;
   requestFile: string;
@@ -140,7 +140,9 @@ const exitOnValidateResult = (
   arg: ReturnType<typeof validateArgumentFormat>,
 ) => {
   if (arg.outputFormatStatus === 'invalid') {
-    console.error(`Invalid output-format. received: ${arg.options.outputFormat}.`);
+    console.error(
+      `Invalid output-format. received: ${arg.options.outputFormat}.`,
+    );
     process.exit(1);
   }
   if (arg.modeStatus === 'invalid') {
@@ -208,8 +210,11 @@ const fetchTypedParams = (options: Partial<CommandOptionType>) => {
     outputFormat,
     scretfilePath: path.resolve(secretFileOption),
     requestFile: path.resolve(options.requestFile!),
-    dryrunSign: !!options.dryRunSign,
-    outputPath: outputFilepath(getOutputSubDirname(mode), formatDateYYYYMMDDHH(now) + '.json'),
+    dryrunSign: !!options.dryrunSign,
+    outputPath: outputFilepath(
+      getOutputSubDirname(mode),
+      formatDateYYYYMMDDHH(now) + '.json',
+    ),
   };
 };
 
@@ -257,12 +262,27 @@ const onDryrunMode = (arg: {
 }) => {
   const dryrunResult: DryrunResult = { txData: arg.txData };
   if (arg.signSuccess != null) dryrunResult.signSuccess = arg.signSuccess;
-  onOutputFormat({ outputFormat: arg.params.outputFormat, params: arg.params, data: dryrunResult });
+  onOutputFormat({
+    outputFormat: arg.params.outputFormat,
+    params: arg.params,
+    data: dryrunResult,
+  });
 };
 
 // sign モード時の出力
-const onSignMode = (arg: { params: ParamsType; signedTransaction: string }) => {
-  onOutputFormat({ outputFormat: arg.params.outputFormat, params: arg.params, data: arg.signedTransaction });
+const onSignMode = (arg: {
+  params: ParamsType;
+  signedTransaction: string;
+  txData: TransactionRequest;
+}) => {
+  onOutputFormat({
+    outputFormat: arg.params.outputFormat,
+    params: arg.params,
+    data: {
+      signedTransaction: arg.signedTransaction,
+      txData: arg.txData,
+    },
+  });
 };
 
 // ==============================
@@ -305,6 +325,7 @@ const runAddressCommand = async (options: CommandOptionType) => {
   if (params.mode === 'sign') {
     return onSignMode({
       signedTransaction,
+      txData,
       params,
     });
   }
