@@ -6,8 +6,6 @@ import { deriveKey } from '../generateHdKey.js';
 import { signTransaction } from '../sign.js';
 import { ethers, TransactionLike, TransactionRequest } from 'ethers';
 
-
-
 const formatDateYYYYMMDDHH = (date: Date): string => {
   const yyyy = date.getFullYear();
   const MM = String(date.getMonth() + 1).padStart(2, '0'); // 月は0-indexed
@@ -18,95 +16,103 @@ const formatDateYYYYMMDDHH = (date: Date): string => {
 
 const outputDir = 'output';
 const outputFilepath = (subdir: 'dryrun' | 'tx', unresolvedPath: string) => {
-  return path.resolve(outputDir, subdir, unresolvedPath)
-}
-type OutputFormatType = 'file' | 'stdout'
-type OutputFormatStatus = OutputFormatType | 'default' | 'invalid'
+  return path.resolve(outputDir, subdir, unresolvedPath);
+};
+type OutputFormatType = 'file' | 'stdout';
+type OutputFormatStatus = OutputFormatType | 'default' | 'invalid';
 
-const getOutputFormatStatus = (outputFormat?: OutputFormatType): OutputFormatStatus => {
+const getOutputFormatStatus = (
+  outputFormat?: OutputFormatType,
+): OutputFormatStatus => {
   if (outputFormat === undefined) {
-    return 'default'
+    return 'default';
   } else if (outputFormat === 'file') {
-    return outputFormat
+    return outputFormat;
   } else if (outputFormat === 'stdout') {
-    return outputFormat
+    return outputFormat;
   } else {
-    return 'invalid'
+    return 'invalid';
   }
-}
+};
 
-type ModeType = 'sign' | 'dryrun'
-type ModeStatus = ModeType | 'default' | 'invalid'
+type ModeType = 'sign' | 'dryrun';
+type ModeStatus = ModeType | 'default' | 'invalid';
 const getModeStatus = (mode?: ModeType): ModeStatus => {
   if (mode === undefined) {
-    return 'default'
+    return 'default';
   } else if (mode === 'sign') {
-    return mode
+    return mode;
   } else if (mode === 'dryrun') {
-    return mode
+    return mode;
   } else {
-    return 'invalid'
+    return 'invalid';
   }
-}
+};
 
 const stringifyJson = (data: any) => {
   return JSON.stringify(
     data,
-    (_, value) =>
-      typeof value === 'bigint' ? value.toString() + 'n' : value,
-    2
-  )
-}
+    (_, value) => (typeof value === 'bigint' ? value.toString() + 'n' : value),
+    2,
+  );
+};
 
 const getOutputSubDirname = (mode: ModeType) => {
   if (mode === 'dryrun') {
-    return 'dryrun'
+    return 'dryrun';
   } else if (mode === 'sign') {
-    return 'tx'
+    return 'tx';
   } else {
-    throw new Error('TS type error.')
+    throw new Error('TS type error.');
   }
-}
-
+};
 
 const defaultSecretFile = 'secret_params.json';
-const defaultOutputFormat: OutputFormatType = 'stdout'
+const defaultOutputFormat: OutputFormatType = 'stdout';
 const validateArgumentFormat = (options: CommandOptionType) => {
-  const outputFormatStatus = getOutputFormatStatus(options.outputFormat)
-  const modeStatus = getModeStatus(options.mode)
+  const outputFormatStatus = getOutputFormatStatus(options.outputFormat);
+  const modeStatus = getModeStatus(options.mode);
 
   return {
     options,
     outputFormatStatus,
     modeStatus,
-  }
-}
+  };
+};
 
-const exitOnValidateResult = (arg: ReturnType<typeof validateArgumentFormat>) => {
+const exitOnValidateResult = (
+  arg: ReturnType<typeof validateArgumentFormat>,
+) => {
   if (arg.outputFormatStatus === 'invalid') {
-    console.error(`Invalid output-format. received: ${arg.options.outputFormat}.`)
-    process.exit(1)
+    console.error(
+      `Invalid output-format. received: ${arg.options.outputFormat}.`,
+    );
+    process.exit(1);
   } else if (arg.modeStatus === 'invalid') {
-    console.error(`Invalid mode. received: ${arg.options.mode}.`)
-    process.exit(1)
+    console.error(`Invalid mode. received: ${arg.options.mode}.`);
+    process.exit(1);
   }
-}
+};
 
-const defaultMode: ModeType = 'dryrun'
-type ParamsType = ReturnType<typeof fetchTypedPramas>
+const defaultMode: ModeType = 'dryrun';
+type ParamsType = ReturnType<typeof fetchTypedPramas>;
 const fetchTypedPramas = (options: Partial<CommandOptionType>) => {
-  const now = new Date()
-  const outputFormat: OutputFormatType = getOutputFormatStatus(options.outputFormat) === 'default' ? defaultOutputFormat : options.outputFormat!
-  const mode: ModeType = getModeStatus(options.mode) === 'default' ? defaultMode : options.mode!
-  const secretFileOption = options.secretFile || defaultSecretFile
+  const now = new Date();
+  const outputFormat: OutputFormatType =
+    getOutputFormatStatus(options.outputFormat) === 'default'
+      ? defaultOutputFormat
+      : options.outputFormat!;
+  const mode: ModeType =
+    getModeStatus(options.mode) === 'default' ? defaultMode : options.mode!;
+  const secretFileOption = options.secretFile || defaultSecretFile;
 
-  const scretfilePath = path.resolve(secretFileOption)
+  const scretfilePath = path.resolve(secretFileOption);
   const filename = formatDateYYYYMMDDHH(now);
-  const outputSubDirname = getOutputSubDirname(mode)
-  const outputPath = outputFilepath(outputSubDirname, filename)
-  const dryrunSign = !!options.dryRunSign
+  const outputSubDirname = getOutputSubDirname(mode);
+  const outputPath = outputFilepath(outputSubDirname, filename);
+  const dryrunSign = !!options.dryRunSign;
 
-  const requestFile = path.resolve(options.requestFile!)
+  const requestFile = path.resolve(options.requestFile!);
 
   return {
     now,
@@ -116,95 +122,95 @@ const fetchTypedPramas = (options: Partial<CommandOptionType>) => {
     requestFile,
     dryrunSign,
     outputPath,
-  }
-}
+  };
+};
 
 const readAndParseJsonPath = <T>(pathStr: string): T => {
-  return JSON.parse(
-    readFileSync(pathStr, 'utf8'),
-  );
-}
+  return JSON.parse(readFileSync(pathStr, 'utf8'));
+};
 
 type RequestFileJsonType = {
-  maxFeePerGas: string,
-  maxPriorityFeePerGas: string,
-  gasLimit: string,
-  from: string,
-  to: string,
-  value: string,
-  chainId: number,
-  nonce: number,
-  type: number
-}
+  maxFeePerGas: string;
+  maxPriorityFeePerGas: string;
+  gasLimit: string;
+  from: string;
+  to: string;
+  value: string;
+  chainId: number;
+  nonce: number;
+  type: number;
+};
 
 const validateSecretPath = (pathStr: string) => {
-  const exists = fs.existsSync(path.resolve(pathStr))
+  const exists = fs.existsSync(path.resolve(pathStr));
   if (!exists) {
-    return 'notfound'
+    return 'notfound';
   }
 
   try {
-    JSON.parse(
-      readFileSync(path.resolve(pathStr), 'utf8'),
-    );
+    JSON.parse(readFileSync(path.resolve(pathStr), 'utf8'));
   } catch (e: any) {
     return 'parseerror';
   }
-}
+};
 
-const validateTransaction = (txData: TransactionRequest): TxValidationResultType => {
+const validateTransaction = (
+  txData: TransactionRequest,
+): TxValidationResultType => {
   try {
-    ethers.Transaction.from(txData as TransactionLike<string>)
+    ethers.Transaction.from(txData as TransactionLike<string>);
 
     return {
       result: 'success',
-    }
+    };
   } catch (e: any) {
     return {
       result: 'failure',
       errorMessage: e.message,
-    }
+    };
   }
-}
+};
 
-const exitOnValidateSecretFile = (error: ReturnType<typeof validateSecretPath>) => {
+const exitOnValidateSecretFile = (
+  error: ReturnType<typeof validateSecretPath>,
+) => {
   if (!error) {
-    return
+    return;
   }
   if (error === 'notfound') {
-    console.log('Secret fileの読み取りに失敗しました')
+    console.log('Secret fileの読み取りに失敗しました');
   } else if (error === 'parseerror') {
-    console.log('Secret fileのJSON parseに失敗しました')
+    console.log('Secret fileのJSON parseに失敗しました');
   }
 
-  process.exit(1)
-}
+  process.exit(1);
+};
 
 type SecreteJsonType = {
-  mnemonic: string
-  derivePath: string
-  passphrase: string
-}
+  mnemonic: string;
+  derivePath: string;
+  passphrase: string;
+};
 
 type CommandOptionType = {
-  mode: ModeType
-  dryRunSign: boolean
-  outputFormat: OutputFormatType
-  secretFile: string
-  requestFile: string
-}
+  mode: ModeType;
+  dryRunSign: boolean;
+  outputFormat: OutputFormatType;
+  secretFile: string;
+  requestFile: string;
+};
 
 type DryrunResult = {
-  txData: TransactionRequest
-  signSuccess?: boolean
-}
+  txData: TransactionRequest;
+  signSuccess?: boolean;
+};
 type TxValidationResultType = {
-  result: 'success' | 'failure'
-  errorMessage?: string
-}
+  result: 'success' | 'failure';
+  errorMessage?: string;
+};
 
 const createTxData = (requestFile: string): TransactionRequest => {
-  const requestData = readAndParseJsonPath<RequestFileJsonType>(requestFile)
+  const requestData = readAndParseJsonPath<RequestFileJsonType>(requestFile);
 
   return {
     maxFeePerGas: BigInt(requestData.maxFeePerGas),
@@ -215,77 +221,61 @@ const createTxData = (requestFile: string): TransactionRequest => {
     value: BigInt(requestData.value),
     chainId: requestData.chainId,
     nonce: requestData.nonce,
-    type: requestData.type
-  }
-}
-
+    type: requestData.type,
+  };
+};
 
 const onOutputFormat = (arg: {
-  outputFormat: OutputFormatType,
-  params: ParamsType
-  data: string,
+  outputFormat: OutputFormatType;
+  params: ParamsType;
+  data: string;
 }) => {
   if (arg.params.outputFormat === 'stdout') {
-    console.log(arg.data)
+    console.log(arg.data);
   } else if (arg.params.outputFormat === 'file') {
-    console.log(`Written to ${arg.params.outputPath}`)
-    writeFileSync(arg.params.outputPath, stringifyJson(arg.data))
+    console.log(`Written to ${arg.params.outputPath}`);
+    writeFileSync(arg.params.outputPath, stringifyJson(arg.data));
   }
-}
+};
 
 const onDryrunMode = (arg: {
-  txData: TransactionRequest,
-  params: ParamsType
-  txValidationResult: TxValidationResultType
-  signSuccess?: boolean
+  txData: TransactionRequest;
+  params: ParamsType;
+  txValidationResult: TxValidationResultType;
+  signSuccess?: boolean;
 }) => {
-  const dryrunResult: DryrunResult = { txData: arg.txData }
+  const dryrunResult: DryrunResult = { txData: arg.txData };
   if (arg.signSuccess != null) {
-    dryrunResult.signSuccess = arg.signSuccess
+    dryrunResult.signSuccess = arg.signSuccess;
   }
 
   onOutputFormat({
     outputFormat: arg.params.outputFormat,
     params: arg.params,
-    data: stringifyJson(dryrunResult)
-  })
-}
+    data: stringifyJson(dryrunResult),
+  });
+};
 
-
-const onSignMode = (arg: {
-  params: ParamsType
-  signedTransaction: string,
-}) => {
+const onSignMode = (arg: { params: ParamsType; signedTransaction: string }) => {
   onOutputFormat({
     outputFormat: arg.params.outputFormat,
     params: arg.params,
     data: arg.signedTransaction,
-  })
-}
-
-export const createAddressCommand = () => {
-  const command = new Command('address');
-  command
-    .command('sign')
-    .description('signs transaction. Defaults to dry-run.')
-    .option('--mode <string>', 'dryrun | sign')
-    .option('--validate-by-sign', 'Validate params by sign. Only works when dry-run')
-    .option('--output-format <string>', 'file | stdout. defaults to stdout.')
-    .option('--secret-file <string>', 'Path to secret file.')
-    .option('--request-file <string>', 'Request file to sign.')
-    .action(runAddressCommand);
-  return command;
+  });
 };
 
 const runAddressCommand = async (options: CommandOptionType) => {
-  exitOnValidateResult(validateArgumentFormat(options))
-  const params = fetchTypedPramas(options)
+  // 引数のチェックおよび読み込み
+  exitOnValidateResult(validateArgumentFormat(options));
+  const params = fetchTypedPramas(options);
 
-  exitOnValidateSecretFile(validateSecretPath(params.scretfilePath))
-  const secret = readAndParseJsonPath<SecreteJsonType>(params.scretfilePath)
+  // secret file が読み込めるかのチェックおよび読み込み
+  exitOnValidateSecretFile(validateSecretPath(params.scretfilePath));
+  const secret = readAndParseJsonPath<SecreteJsonType>(params.scretfilePath);
 
-  const txData = createTxData(params.requestFile)
-  const txValidationResult = validateTransaction(txData)
+  // request fileからTXのデータをチェックおよび読み込み(署名前)
+  const txData = createTxData(params.requestFile);
+  const txValidationResult = validateTransaction(txData);
 
   // 署名なしdryrunの場合はここまで
   if (params.mode === 'dryrun' && !params.dryrunSign) {
@@ -293,10 +283,10 @@ const runAddressCommand = async (options: CommandOptionType) => {
       txData,
       txValidationResult,
       params,
-    })
+    });
   }
 
-  // 実際に署名まで行う
+  // 実際に署名を行う
   const key = deriveKey({
     mnemonicString: secret.mnemonic,
     passphrase: secret.passphrase,
@@ -313,12 +303,26 @@ const runAddressCommand = async (options: CommandOptionType) => {
       txData,
       params,
       txValidationResult,
-      signSuccess: true
-    })
+      signSuccess: true,
+    });
   } else if (params.mode === 'sign') {
     onSignMode({
       signedTransaction,
       params,
-    })
+    });
   }
-}
+};
+
+export const createAddressCommand = () => {
+  const command = new Command('address');
+  command
+    .command('sign')
+    .description('signs transaction. Defaults to dry-run.')
+    .option('--mode <string>', 'dryrun | sign')
+    .option('--dryrun-sign', 'Validate params by sign. Only works when dry-run')
+    .option('--output-format <string>', 'file | stdout. defaults to stdout.')
+    .option('--secret-file <string>', 'Path to secret file.')
+    .option('--request-file <string>', 'Request file to sign.')
+    .action(runAddressCommand);
+  return command;
+};
