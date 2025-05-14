@@ -37,7 +37,8 @@
     "dotenv": "^16.5.0",
     "elliptic": "^6.6.1",
     "ethers": "^6.14.0",
-    "secp256k1": "^5.0.1"
+    "secp256k1": "^5.0.1",
+    "zod": "^3.24.4"
   },
   "bin": {
     "ethereum_exam": "dist/cli.js"

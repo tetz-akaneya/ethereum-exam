@@ -1,4 +1,7 @@
 node_modules/
 .env
 dist
-secret_params.json
+private_request/*
+secret_params*
+output
+
