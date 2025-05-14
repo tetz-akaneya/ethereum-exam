@@ -1,9 +1,8 @@
 import { Command } from 'commander';
-import { readFileSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 import path from 'path';
-import * as fs from 'fs';
-import { deriveKey } from '../generateHdKey.js';
-import { signTransaction } from '../sign.js';
+import { deriveKey } from '../generateHdKey';
+import { signTransaction } from '../sign';
 import { ethers, TransactionLike, TransactionRequest } from 'ethers';
 
 const formatDateYYYYMMDDHH = (date: Date): string => {
@@ -19,9 +18,9 @@ const outputFilepath = (subdir: 'dryrun' | 'tx', unresolvedPath: string) => {
   return path.resolve(outputDir, subdir, unresolvedPath);
 };
 type OutputFormatType = 'file' | 'stdout';
-type OutputFormatStatus = OutputFormatType | 'default' | 'invalid';
+export type OutputFormatStatus = OutputFormatType | 'default' | 'invalid';
 
-const getOutputFormatStatus = (
+export const getOutputFormatStatus = (
   outputFormat?: OutputFormatType,
 ): OutputFormatStatus => {
   if (outputFormat === undefined) {
@@ -52,7 +51,7 @@ const getModeStatus = (mode?: ModeType): ModeStatus => {
 const stringifyJson = (data: any) => {
   return JSON.stringify(
     data,
-    (_, value) => (typeof value === 'bigint' ? value.toString() + 'n' : value),
+    (_, value) => (typeof value === 'bigint' ? value.toString() : value),
     2,
   );
 };
@@ -95,8 +94,8 @@ const exitOnValidateResult = (
 };
 
 const defaultMode: ModeType = 'dryrun';
-type ParamsType = ReturnType<typeof fetchTypedPramas>;
-const fetchTypedPramas = (options: Partial<CommandOptionType>) => {
+type ParamsType = ReturnType<typeof fetchTypedParams>;
+const fetchTypedParams = (options: Partial<CommandOptionType>) => {
   const now = new Date();
   const outputFormat: OutputFormatType =
     getOutputFormatStatus(options.outputFormat) === 'default'
@@ -141,16 +140,19 @@ type RequestFileJsonType = {
   type: number;
 };
 
-const validateSecretPath = (pathStr: string) => {
-  const exists = fs.existsSync(path.resolve(pathStr));
+type ValidateSecretPathResult =
+  | 'notfound' | 'success' | 'prseerror'
+const validateSecretPath = (pathStr: string): ValidateSecretPathResult => {
+  const exists = existsSync(path.resolve(pathStr));
   if (!exists) {
     return 'notfound';
   }
 
   try {
     JSON.parse(readFileSync(path.resolve(pathStr), 'utf8'));
+    return 'success'
   } catch (e: any) {
-    return 'parseerror';
+    return 'prseerror';
   }
 };
 
@@ -172,19 +174,21 @@ const validateTransaction = (
 };
 
 const exitOnValidateSecretFile = (
-  error: ReturnType<typeof validateSecretPath>,
+  result: ReturnType<typeof validateSecretPath>,
 ) => {
-  if (!error) {
+  if (result === 'success') {
     return;
   }
-  if (error === 'notfound') {
-    console.log('Secret fileの読み取りに失敗しました');
-  } else if (error === 'parseerror') {
-    console.log('Secret fileのJSON parseに失敗しました');
+
+  if (result === 'notfound') {
+    console.log('Failed to read the secret file');
+  } else if (result === 'prseerror') {
+    console.log('Failed to parse the secret file as JSON');
   }
 
   process.exit(1);
 };
+
 
 type SecreteJsonType = {
   mnemonic: string;
@@ -209,7 +213,7 @@ type TxValidationResultType = {
   errorMessage?: string;
 };
 
-const createTxData = (requestFile: string): TransactionRequest => {
+export const createTxData = (requestFile: string): TransactionRequest => {
   const requestData = readAndParseJsonPath<RequestFileJsonType>(requestFile);
 
   return {
@@ -267,13 +271,13 @@ const onSignMode = (arg: { params: ParamsType; signedTransaction: string }) => {
 const runAddressCommand = async (options: CommandOptionType) => {
   // 引数のチェックおよび読み込み
   exitOnValidateResult(validateArgumentFormat(options));
-  const params = fetchTypedPramas(options);
+  const params = fetchTypedParams(options);
 
   // secret file が読み込めるかのチェックおよび読み込み
   exitOnValidateSecretFile(validateSecretPath(params.scretfilePath));
   const secret = readAndParseJsonPath<SecreteJsonType>(params.scretfilePath);
 
-  // request fileからTXのデータをチェックおよび読み込み(署名前)
+  // request fileのデータをチェックおよび読み込み(署名前)
   const txData = createTxData(params.requestFile);
   const txValidationResult = validateTransaction(txData);
 
@@ -305,11 +309,13 @@ const runAddressCommand = async (options: CommandOptionType) => {
       txValidationResult,
       signSuccess: true,
     });
+    return
   } else if (params.mode === 'sign') {
     onSignMode({
       signedTransaction,
       params,
     });
+    return
   }
 };
 

@@ -1,0 +1,12 @@
+{
+  "maxFeePerGas": "1000000000",
+  "maxPriorityFeePerGas": "2000000000",
+  "gasLimit": "21000",
+  "to": "0xabc123abc123abc123abc123abc123abc123abcd",
+  "from": "0xdef456def456def456def456def456def456def0",
+  "value": "1000000000000000000",
+  "chainId": 1,
+  "nonce": 5,
+  "type": 2
+}
+
