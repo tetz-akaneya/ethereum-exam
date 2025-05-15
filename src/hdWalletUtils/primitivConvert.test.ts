@@ -1,19 +1,20 @@
 import * as fc from 'fast-check';
+
 import {
-  uint8ArrayToHex,
-  bigintToInt,
-  uint8ArrayToBuffer,
-  hexToUint8Array,
-  hexToBuffer,
-  bufferToHex,
-  bufferToBigInt,
-  intToBuffer,
   bigintToBuffer,
   bigintToHex,
+  bigintToInt,
+  bufferToBigInt,
+  bufferToHex,
   bufferToInt,
   bufferToUint8Array,
   hexToBigInt,
+  hexToBuffer,
+  hexToUint8Array,
   intToBigInt,
+  intToBuffer,
+  uint8ArrayToBuffer,
+  uint8ArrayToHex,
 } from './primitiveConvert.js'; // パスを適宜修正
 
 describe('Conversion functions', () => {

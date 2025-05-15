@@ -1,14 +1,7 @@
 import { ethers, Wallet } from 'ethers';
+import { Mnemonic } from 'ethers';
 import * as fc from 'fast-check';
-import {
-  createMasterKeyBip32,
-  createPublicKey,
-  ethereumAddressFromPrivKey,
-  mnemonicToSeed,
-  selfmadeCKDpriv,
-  selfmadeDeriveKey,
-} from './hdwallet';
-import { multiplyGNTimesEc } from './testUse/libraryImp';
+import secp256k1 from 'secp256k1';
 
 import {
   changePathDict,
@@ -20,6 +13,14 @@ import {
 } from '../generateHdKey';
 import { CURVE_ORDER, G, HARDENED_OFFSET } from './constant';
 import {
+  createMasterKeyBip32,
+  createPublicKey,
+  ethereumAddressFromPrivKey,
+  mnemonicToSeed,
+  selfmadeCKDpriv,
+  selfmadeDeriveKey,
+} from './hdwallet';
+import {
   bigintToHex,
   bufferToHex,
   hexToBuffer,
@@ -27,9 +28,7 @@ import {
   multiplyPointNTimes,
   uint8ArrayToHex,
 } from './primitiveConvert.js';
-
-import secp256k1 from 'secp256k1';
-import { Mnemonic } from 'ethers';
+import { multiplyGNTimesEc } from './testUse/libraryImp';
 
 describe('createMasterKeyBip32', () => {
   it('works same as library', () => {

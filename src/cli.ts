@@ -1,5 +1,6 @@
 #!/usr/bin/env ts-node
 import { Command } from 'commander';
+
 import { createSignCommand } from './cli/signCommand.js';
 
 const program = new Command();

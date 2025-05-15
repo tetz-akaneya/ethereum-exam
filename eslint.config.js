@@ -1,8 +1,9 @@
-import eslintPluginPrettier from 'eslint-plugin-prettier';
 import eslintConfigPrettier from 'eslint-config-prettier';
-import tseslint from 'typescript-eslint';
-import eslintPluginUnusedImports from 'eslint-plugin-unused-imports'
 import eslintPluginImport from 'eslint-plugin-import';
+import eslintPluginPrettier from 'eslint-plugin-prettier';
+import eslintPluginUnusedImports from 'eslint-plugin-unused-imports';
+import tseslint from 'typescript-eslint';
+import simpleImportSort from 'eslint-plugin-simple-import-sort';
 
 export default tseslint.config(
   {
@@ -18,6 +19,7 @@ export default tseslint.config(
       prettier: eslintPluginPrettier,
       import: eslintPluginImport,
       'unused-imports': eslintPluginUnusedImports,
+      'simple-import-sort': simpleImportSort
     },
     rules: {
       // TypeScriptルール例
@@ -42,6 +44,8 @@ export default tseslint.config(
         tsx: 'never',
       }],
       'unused-imports/no-unused-imports': 'error',
+      'simple-import-sort/imports': 'error',
+      'simple-import-sort/exports': 'error',
     },
     settings: {
       'import/resolver': {

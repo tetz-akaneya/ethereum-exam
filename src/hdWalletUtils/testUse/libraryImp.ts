@@ -1,5 +1,5 @@
 import BN from 'bn.js';
-import { ec as EC, curve } from 'elliptic';
+import { curve, ec as EC } from 'elliptic';
 
 // test のため
 export function multiplyGNTimesEc(n: bigint) {
