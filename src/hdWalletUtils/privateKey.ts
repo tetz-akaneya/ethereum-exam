@@ -5,12 +5,12 @@ import { HARDENED_OFFSET } from './bip32Path.js';
 import {
   CURVE_ORDER,
   G,
-  modP,
+  primeNumSecp256k1,
   multiplyPointNTimes,
   serializePoint,
-  toBigintModP,
 } from './secp256k1/point.js';
 import { appendHexPrefix, hexToUBigInt, uint8ArrayToHex, hexToUint8Array, uIntToBuffer, bufferToUBigInt, uBigintToBuffer } from '../primitive/converter.js';
+import { addInModP } from './secp256k1/finite.js';
 
 // Ethereumアドレス取得（0x付き、先頭12バイト除去）
 export const getEthereumAddress = (privKey: Buffer): string => {
@@ -61,13 +61,14 @@ export const CKDpriv = (arg: {
   const I = createHmac('sha512', arg.chainCode).update(data).digest();
   const IL = I.subarray(0, 32);
   const IR = I.subarray(32);
-  const childKeyBn = toBigintModP(
-    bufferToUBigInt(IL) + bufferToUBigInt(arg.privKey),
+  const childKeyBn = addInModP(
+    bufferToUBigInt(IL),
+    bufferToUBigInt(arg.privKey),
     CURVE_ORDER,
   );
 
   if (childKeyBn === 0n) throw new Error('Derived key is invalid (zero)');
-  if (modP < bufferToUBigInt(IL))
+  if (primeNumSecp256k1 < bufferToUBigInt(IL))
     throw new Error('Derived key is invalid (larger than modP)');
 
   return {
