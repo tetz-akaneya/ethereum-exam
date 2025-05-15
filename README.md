@@ -110,7 +110,7 @@ Signs transaction.
 Options:
   --mode <string>           "dryrun" | "sign"
   --dryrun-sign             Validate params by doing sign. Only works when mode is "dryrun"
-  --output-format <string>  file | stdout. Default is "stdout".
+  --output-format <string>  "file" | "stdout". Default is "stdout".
   --secret-file <string>    Path to secret file. Default is "secret_params.json"
   --request-file <string>   Request file to sign.
   -h, --help                display help for command
