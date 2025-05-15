@@ -3,8 +3,8 @@ import { Transaction, TransactionLike, TransactionRequest } from 'ethers';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import path from 'path';
 
-import { deriveKeyFromMnemonic } from '../generateHdKey.js';
-import { signTransaction } from '../sign.js';
+import { deriveKeyInfoFromMnemonic } from '../hdWalletUtils/mnemonic.js';
+import { signTransaction } from '../transaction.js';
 
 // ==============================
 // 定数
@@ -307,8 +307,8 @@ const runAddressCommand = async (options: CommandOptionType) => {
     return onDryrunMode({ txData, txValidationResult, params });
   }
 
-  const key = deriveKeyFromMnemonic({
-    mnemonicString: secret.mnemonic,
+  const key = deriveKeyInfoFromMnemonic({
+    mnemonic: secret.mnemonic,
     passphrase: secret.passphrase,
     path: secret.derivePath,
   });

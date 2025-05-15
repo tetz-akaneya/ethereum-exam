@@ -5,7 +5,7 @@ import {
   createTxData,
   getOutputFormatStatus,
   OutputFormatStatus,
-} from '@/cli/signCommand.js';
+} from './signCommand.js';
 
 describe('createTxData (with real file)', () => {
   it('creates transaction from actual JSON file', () => {

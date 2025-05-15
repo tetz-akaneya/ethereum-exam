@@ -1,7 +1,6 @@
 import { parseEther, parseUnits, TransactionRequest } from 'ethers';
 
-import { decodeTx } from './decodeTx.js';
-import { signTransaction } from './sign.js';
+import { decodeTx, signTransaction } from './transaction';
 
 // トランザクションデータ（オンライン側から取得し、オフラインに持ち込む）
 const testTxData: TransactionRequest = {
