@@ -45,7 +45,7 @@ typeは、EIP1559の場合は2を指定。
 
 from は、mnemonic + derivePathから生成されるアドレスであることが必要。
 
-ex
+例(フォーマット)
 ```
 {
   "maxFeePerGas": "3000000000",
