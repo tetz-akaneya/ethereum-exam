@@ -2,7 +2,7 @@ import { pbkdf2Sync, randomBytes } from 'crypto';
 import { Mnemonic } from 'ethers';
 
 import { deriveKeyInfoFromSeed } from './seed.js';
-import { uint8ArrayToBuffer, uint8ArrayToHex, bufferToHex } from '../converter/primitive.js';
+import { uint8ArrayToBuffer, uint8ArrayToHex, bufferToHex } from '../primitive/converter.js';
 
 /*
  * mnemonic を作る。entropyは32byteが推奨。

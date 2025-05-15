@@ -45,12 +45,12 @@ export const genBip44Path = (arg: {
  * m/44'/60'/0/2/3 -> [2147483692, 2147483708, 0, 2, 3]
  * Hardened indexは 2^31 を加算して表現
  */
-export const parseDerivationPath = (path: string): number[] => {
-  if (!path.startsWith('m/')) {
+export const parseDerivationPath = (arg: { path: string }): number[] => {
+  if (!arg.path.startsWith('m/')) {
     throw new Error("Path must start with 'm/'");
   }
 
-  return path
+  return arg.path
     .slice(2) // "m/" を取り除く
     .split('/')
     .map((component) => {

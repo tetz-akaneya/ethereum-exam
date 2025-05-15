@@ -9,7 +9,7 @@ import {
   typedKeys,
 } from './bip32Path';
 import { createMasterKey, deriveKeyInfoFromSeed } from './seed';
-import { hexToBuffer, bigintToHex, bufferToHex } from '../converter/primitive';
+import { hexToBuffer, uBigIntToHex, bufferToHex } from '../primitive/converter';
 
 describe('selfmadeDeriveKey', () => {
   it('works same as library', () => {
@@ -29,7 +29,7 @@ describe('selfmadeDeriveKey', () => {
             change: changePathDict[changeKey],
             index,
           });
-          const seed = hexToBuffer(bigintToHex(seedNum));
+          const seed = hexToBuffer(uBigIntToHex(seedNum));
           const wallet =
             ethers.HDNodeWallet.fromSeed(seed).derivePath(generatedPath);
           const expected = {

@@ -2,6 +2,7 @@
 // Convert 関数群
 // ----------------------
 export const appendHexPrefix = (hex: string) => `0x${hex}`;
+
 /**
  * Uint8Array → Hex文字列（小文字, プレフィックスなし）
  */
@@ -18,7 +19,7 @@ export const uint8ArrayToHex = (
 /**
  * bigint → number（安全な範囲内のみ）
  */
-export const bigintToInt = (bn: bigint): number => {
+export const ubigintToUInt = (bn: bigint): number => {
   const num = Number(bn);
   if (!Number.isSafeInteger(num)) {
     throw new Error('bigint is too large to convert safely to number');
@@ -67,13 +68,13 @@ export const bufferToHex = (buffer: Buffer, prefix = false): string => {
 /**
  * Buffer → bigint（BE解釈）
  */
-export const bufferToBigInt = (buffer: Buffer): bigint =>
+export const bufferToUBigInt = (buffer: Buffer): bigint =>
   BigInt(appendHexPrefix(buffer.toString('hex')));
 
 /**
  * number → Buffer（BE, 固定長, 最大4byte）
  */
-export const intToBuffer = (n: number, byteLength: number): Buffer => {
+export const uIntToBuffer = (n: number, byteLength: number): Buffer => {
   if (!Number.isInteger(n) || n < 0) {
     throw new Error('Only non-negative integers are supported');
   }
@@ -85,7 +86,7 @@ export const intToBuffer = (n: number, byteLength: number): Buffer => {
 /**
  * bigint → Buffer（BE, 固定長, オーバーフロー検出あり）
  */
-export const bigintToBuffer = (n: bigint, byteSize: number): Buffer => {
+export const uBigintToBuffer = (n: bigint, byteSize: number): Buffer => {
   if (n < 0n) throw new Error('Only non-negative integers are supported');
 
   const hex = n.toString(16).padStart(byteSize * 2, '0');
@@ -99,7 +100,7 @@ export const bigintToBuffer = (n: bigint, byteSize: number): Buffer => {
 /**
  * bigint → Hex文字列（プレフィックス/ゼロ埋めあり）
  */
-export const bigintToHex = (
+export const uBigIntToHex = (
   n: bigint,
   byteLength?: number,
   prefix = false,
@@ -124,7 +125,7 @@ export const bufferToUint8Array = (buf: Buffer): Uint8Array =>
 /**
  * Hex文字列 → bigint（0x付き可）
  */
-export const hexToBigInt = (hex: string): bigint => {
+export const hexToUBigInt = (hex: string): bigint => {
   if (hex.startsWith('0x')) hex = hex.slice(2);
   if (!/^[0-9a-fA-F]*$/.test(hex)) throw new Error('Invalid hex string');
 
@@ -141,7 +142,7 @@ export const intToBigInt = (n: number): bigint => {
 /**
  * Buffer → number（最大6byte, BE）
  */
-export const bufferToInt = (buf: Buffer): number => {
+export const bufferToUInt = (buf: Buffer): number => {
   if (buf.length > 6) {
     throw new Error('Too large to safely convert to number');
   }

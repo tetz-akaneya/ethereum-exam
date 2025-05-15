@@ -1,21 +1,21 @@
 import * as fc from 'fast-check';
 
 import {
-  bigintToBuffer,
-  bigintToHex,
-  bigintToInt,
-  bufferToBigInt,
+  uBigintToBuffer,
+  uBigIntToHex,
+  ubigintToUInt,
+  bufferToUBigInt,
   bufferToHex,
-  bufferToInt,
+  bufferToUInt,
   bufferToUint8Array,
-  hexToBigInt,
+  hexToUBigInt,
   hexToBuffer,
   hexToUint8Array,
   intToBigInt,
-  intToBuffer,
+  uIntToBuffer,
   uint8ArrayToBuffer,
   uint8ArrayToHex,
-} from './primitive.js'; // パスを適宜修正
+} from './converter.js'; // パスを適宜修正
 
 describe('Conversion functions', () => {
   describe('uint8ArrayToHex and hexToUint8Array', () => {
@@ -37,7 +37,7 @@ describe('Conversion functions', () => {
           fc.integer({ min: 0, max: Number.MAX_SAFE_INTEGER }),
           (n) => {
             const b = BigInt(n);
-            expect(bigintToInt(b)).toBe(n);
+            expect(ubigintToUInt(b)).toBe(n);
           },
         ),
       );
@@ -72,8 +72,8 @@ describe('Conversion functions', () => {
     it('should round-trip correctly for 256-bit values', () => {
       fc.assert(
         fc.property(fc.bigInt({ min: 0n, max: 2n ** 256n - 1n }), (bn) => {
-          const buf = bigintToBuffer(bn, 32);
-          const back = bufferToBigInt(buf);
+          const buf = uBigintToBuffer(bn, 32);
+          const back = bufferToUBigInt(buf);
           expect(back).toBe(bn);
         }),
       );
@@ -84,7 +84,7 @@ describe('Conversion functions', () => {
     it('should encode and decode 4-byte integers correctly', () => {
       fc.assert(
         fc.property(fc.integer({ min: 0, max: 0xffffffff }), (n) => {
-          const buf = intToBuffer(n, 4);
+          const buf = uIntToBuffer(n, 4);
           const decoded = buf.readUIntBE(0, 4);
           expect(decoded).toBe(n);
         }),
@@ -96,7 +96,7 @@ describe('Conversion functions', () => {
     it('should return correct padded hex string for byteLength=32', () => {
       fc.assert(
         fc.property(fc.bigInt({ min: 0n, max: 2n ** 256n - 1n }), (bn) => {
-          const hex = bigintToHex(bn, 32);
+          const hex = uBigIntToHex(bn, 32);
           expect(hex.length).toBe(64); // 32 bytes * 2
           expect(/^[0-9a-f]+$/i.test(hex)).toBe(true);
         }),
@@ -120,8 +120,8 @@ describe('Conversion functions', () => {
     it('should parse back from bigintToHex (round-trip)', () => {
       fc.assert(
         fc.property(fc.bigInt({ min: 0n, max: 2n ** 256n - 1n }), (bn) => {
-          const hex = bigintToHex(bn, undefined, true); // 0x-prefixed
-          const parsed = hexToBigInt(hex);
+          const hex = uBigIntToHex(bn, undefined, true); // 0x-prefixed
+          const parsed = hexToUBigInt(hex);
           expect(parsed).toBe(bn);
         }),
       );
@@ -146,8 +146,8 @@ describe('Conversion functions', () => {
     it('should correctly decode intToBuffer results', () => {
       fc.assert(
         fc.property(fc.integer({ min: 0, max: 0xffffffff }), (n) => {
-          const buf = intToBuffer(n, 4);
-          const result = bufferToInt(buf);
+          const buf = uIntToBuffer(n, 4);
+          const result = bufferToUInt(buf);
           expect(result).toBe(n);
         }),
       );

@@ -1,6 +1,6 @@
 import BN from 'bn.js';
 import elliptic from 'elliptic';
-import { appendHexPrefix } from '../../converter/primitive.js';
+import { appendHexPrefix } from '../../primitive/converter';
 
 const EC = elliptic.ec
 

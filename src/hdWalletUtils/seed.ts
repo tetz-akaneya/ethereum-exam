@@ -17,11 +17,17 @@ export const deriveKeyInfoFromSeed = (arg: {
   passphrase: string;
   path: string;
 }) => {
-  const parsedPath = parseDerivationPath(arg.path);
+  const parsedPath = parseDerivationPath({
+    path: arg.path
+  });
   const I = createMasterKey(arg.seed);
 
   const keysForPath = parsedPath.reduce((prev, index) => {
-    return CKDpriv(prev.privKey, prev.chainCode, index);
+    return CKDpriv({
+      privKey: prev.privKey,
+      chainCode: prev.chainCode,
+      index,
+    });
   }, I);
 
   const publicKey = getPublicKey(keysForPath.privKey, true);

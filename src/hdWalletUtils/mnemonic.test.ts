@@ -7,7 +7,7 @@ import {
   purposeDict,
 } from './bip32Path';
 import { createMnemonic, deriveKeyInfoFromMnemonic, toSeed } from './mnemonic';
-import { uint8ArrayToHex } from '../converter/primitive';
+import { uint8ArrayToHex } from '../primitive/converter';
 
 const passphrase = 'passphrase';
 

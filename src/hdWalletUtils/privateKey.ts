@@ -10,7 +10,7 @@ import {
   serializePoint,
   toBigintModP,
 } from './secp256k1/point.js';
-import { appendHexPrefix, hexToBigInt, uint8ArrayToHex, hexToUint8Array, intToBuffer, bufferToBigInt, bigintToBuffer } from '../converter/primitive.js';
+import { appendHexPrefix, hexToUBigInt, uint8ArrayToHex, hexToUint8Array, uIntToBuffer, bufferToUBigInt, uBigintToBuffer } from '../primitive/converter.js';
 
 // Ethereumアドレス取得（0x付き、先頭12バイト除去）
 export const getEthereumAddress = (privKey: Buffer): string => {
@@ -28,13 +28,13 @@ export const getPublicKey = (
   privateKey: Uint8Array,
   compressed: boolean = true,
 ) => {
-  const privateKeyBignum = hexToBigInt(uint8ArrayToHex(privateKey));
+  const privateKeyBignum = hexToUBigInt(uint8ArrayToHex(privateKey));
   if (privateKeyBignum >= CURVE_ORDER) {
     return new Uint8Array();
   }
 
   const PublicKeyPoint = multiplyPointNTimes(
-    hexToBigInt(appendHexPrefix(uint8ArrayToHex(privateKey))),
+    hexToUBigInt(appendHexPrefix(uint8ArrayToHex(privateKey))),
     G,
   );
   const publicKey = serializePoint(PublicKeyPoint, compressed);
@@ -45,29 +45,33 @@ export const getPublicKey = (
 /*
  * BIP32 のCKDPriv関数実装
  */
-export const CKDpriv = (privKey: Buffer, chainCode: Buffer, index: number) => {
-  const indexBuffer = intToBuffer(index, 4);
+export const CKDpriv = (arg: {
+  privKey: Buffer,
+  chainCode: Buffer,
+  index: number
+}) => {
+  const indexBuffer = uIntToBuffer(arg.index, 4);
   let data: Buffer;
-  if (index >= HARDENED_OFFSET) {
-    data = Buffer.concat([Buffer.from([0x00]), privKey, indexBuffer]);
+  if (arg.index >= HARDENED_OFFSET) {
+    data = Buffer.concat([Buffer.from([0x00]), arg.privKey, indexBuffer]);
   } else {
-    data = Buffer.concat([getPublicKey(privKey, true), indexBuffer]);
+    data = Buffer.concat([getPublicKey(arg.privKey, true), indexBuffer]);
   }
 
-  const I = createHmac('sha512', chainCode).update(data).digest();
+  const I = createHmac('sha512', arg.chainCode).update(data).digest();
   const IL = I.subarray(0, 32);
   const IR = I.subarray(32);
   const childKeyBn = toBigintModP(
-    bufferToBigInt(IL) + bufferToBigInt(privKey),
+    bufferToUBigInt(IL) + bufferToUBigInt(arg.privKey),
     CURVE_ORDER,
   );
 
   if (childKeyBn === 0n) throw new Error('Derived key is invalid (zero)');
-  if (modP < bufferToBigInt(IL))
+  if (modP < bufferToUBigInt(IL))
     throw new Error('Derived key is invalid (larger than modP)');
 
   return {
-    privKey: bigintToBuffer(childKeyBn, 32),
+    privKey: uBigintToBuffer(childKeyBn, 32),
     chainCode: IR,
   };
 };
