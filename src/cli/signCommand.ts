@@ -343,11 +343,11 @@ export const createSignCommand = () => {
   const command = new Command('sign');
 
   command
-    .description('signs transaction. Defaults to dry-run.')
-    .option('--mode <string>', 'dryrun | sign')
-    .option('--dryrun-sign', 'Validate params by sign. Only works when dry-run')
-    .option('--output-format <string>', 'file | stdout. defaults to stdout.')
-    .option('--secret-file <string>', 'Path to secret file.')
+    .description('Signs transaction.')
+    .requiredOption('--mode <string>', '"dryrun" | "sign"')
+    .option('--dryrun-sign', 'Validate params by doing sign. Only works when mode is "dryrun"')
+    .option('--output-format <string>', `file | stdout. Default is "${defaultOutputFormat}".`)
+    .option('--secret-file <string>', `Path to secret file. Default is "${defaultSecretFile}"`)
     .option('--request-file <string>', 'Request file to sign.')
     .action(runAddressCommand);
   return command;
