@@ -26,6 +26,8 @@ ethereum_exam sign -h
 ```
 
 ### secret_params.json を配置
+推奨配置位置: <project-root>/secret_params.json
+
 ```
 {
   "mnemonic": "blah blah ... blah",
@@ -43,7 +45,10 @@ mkdir private_request
 数量はwei、文字列指定。
 typeは、EIP1559の場合は2を指定。
 
-from は、mnemonic + derivePathから生成されるアドレスであることが必要。
+from は、mnemonic + derivePathから生成されるアドレスと一致することが必要。
+
+推奨配置位置: <project-root>/private_request/request_xxx.json
+
 
 例(フォーマット)
 ```
