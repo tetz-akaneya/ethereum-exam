@@ -78,7 +78,6 @@ const formatDateYYYYMMDDHHmmss = (date: Date): string => {
   return `${yyyy}${MM}${dd}${HH}${mm}${ss}`;
 };
 
-
 // 出力ファイルパスを構築
 const outputFilepath = (subdir: OutputSubDir, unresolvedPath: string) => {
   return path.resolve(outputDir, subdir, unresolvedPath);
@@ -345,9 +344,18 @@ export const createSignCommand = () => {
   command
     .description('Signs transaction.')
     .requiredOption('--mode <string>', '"dryrun" | "sign"')
-    .option('--dryrun-sign', 'Validate params by doing sign. Only works when mode is "dryrun"')
-    .option('--output-format <string>', `"file" | "stdout". Default is "${defaultOutputFormat}".`)
-    .option('--secret-file <string>', `Path to secret file. Default is "${defaultSecretFile}"`)
+    .option(
+      '--dryrun-sign',
+      'Validate params by doing sign. Only works when mode is "dryrun"',
+    )
+    .option(
+      '--output-format <string>',
+      `"file" | "stdout". Default is "${defaultOutputFormat}".`,
+    )
+    .option(
+      '--secret-file <string>',
+      `Path to secret file. Default is "${defaultSecretFile}"`,
+    )
     .option('--request-file <string>', 'Request file to sign.')
     .action(runAddressCommand);
   return command;
