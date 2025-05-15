@@ -1,5 +1,6 @@
 import BN from 'bn.js';
 import { curve, ec as EC } from 'elliptic';
+import { appendHexPrefix } from '../primitiveConvert';
 
 // test のため
 export function multiplyGNTimesEc(n: bigint) {
@@ -12,7 +13,7 @@ export function multiplyGNTimesEc(n: bigint) {
   const multipliedG = G.mul(new BN(n.toString(10)));
 
   return [
-    BigInt('0x' + multipliedG.getX().toString(16)),
-    BigInt('0x' + multipliedG.getY().toString(16)),
+    BigInt(appendHexPrefix(multipliedG.getX().toString(16))),
+    BigInt(appendHexPrefix(multipliedG.getY().toString(16))),
   ];
 }

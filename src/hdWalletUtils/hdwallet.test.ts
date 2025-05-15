@@ -21,14 +21,15 @@ import {
   selfmadeDeriveKey,
 } from './hdwallet';
 import {
+  appendHexPrefix,
   bigintToHex,
   bufferToHex,
   hexToBuffer,
   hexToUint8Array,
-  multiplyPointNTimes,
   uint8ArrayToHex,
 } from './primitiveConvert.js';
 import { multiplyGNTimesEc } from './testUse/libraryImp';
+import { multiplyPointNTimes } from './secp256k1Op';
 
 describe('createMasterKeyBip32', () => {
   it('works same as library', () => {
@@ -131,7 +132,7 @@ describe('createAddress', () => {
         const privBuf = Buffer.from(hex, 'hex');
 
         const customResult = ethereumAddressFromPrivKey(privBuf);
-        const wallet = new Wallet('0x' + hex);
+        const wallet = new Wallet(appendHexPrefix(hex));
         const libResult = wallet.address;
 
         expect(customResult).toEqual(libResult.toLowerCase());

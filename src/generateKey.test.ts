@@ -56,7 +56,7 @@ describe('deriveKey', () => {
   });
 });
 
-describe('genBipTypicalPath', () => {
+describe('genBip44Path', () => {
   it('should generate correct BIP44 path format for random path', () => {
     fc.assert(
       fc.property(
@@ -66,7 +66,7 @@ describe('genBipTypicalPath', () => {
         fc.constantFrom(...typedKeys(changePathDict)),
         fc.integer({ min: 0, max: 2 ** 31 - 1 }),
         (purposeKey, coinTypeKey, account, changeKey, index) => {
-          const result = genBip44Path({
+          const actual = genBip44Path({
             purpose: purposeDict[purposeKey],
             coinType: coinTypeDict[coinTypeKey],
             account,
@@ -75,7 +75,7 @@ describe('genBipTypicalPath', () => {
           });
 
           const expected = `m/${purposeDict[purposeKey]}'/${coinTypeDict[coinTypeKey]}'/${account}'/${changePathDict[changeKey]}/${index}`;
-          expect(result).toEqual(expected);
+          expect(actual).toEqual(expected);
         },
       ),
     );
@@ -84,6 +84,10 @@ describe('genBipTypicalPath', () => {
 
 describe('createMnemonic', () => {
   it('should generate 24-word mnemonic when byteSize is 32', () => {
-    expect(createMnemonic({ byteSize: 32 }).split(' ').length).toEqual(24);
+    const actual = createMnemonic({ byteSize: 32 }).split(' ').length
+    const expected = 24
+
+    expect(actual).toEqual(expected);
   });
 });
+

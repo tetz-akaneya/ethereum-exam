@@ -4,15 +4,15 @@ import { ethers } from 'ethers';
 
 import { CURVE_ORDER, G, HARDENED_OFFSET, modP, Point } from './constant.js';
 import {
+  appendHexPrefix,
   bigintToBuffer,
   bufferToBigInt,
   hexToBigInt,
   hexToUint8Array,
   intToBuffer,
-  multiplyPointNTimes,
-  toBigintModP,
   uint8ArrayToHex,
 } from './primitiveConvert.js';
+import { toBigintModP, multiplyPointNTimes } from './secp256k1Op.js';
 
 // ----------------------
 // 自作のHDウォレット用関数
@@ -64,7 +64,7 @@ export const ethereumAddressFromPrivKey = (privKey: Buffer): string => {
   // 非圧縮形式であることに注意
   const pubKey = createPublicKey(privKey, false).subarray(1); // 65バイト中、先頭1バイトを除去
   const address = ethers.keccak256(pubKey).slice(-40); // 下位20バイト
-  return '0x' + address;
+  return appendHexPrefix(address);
 };
 
 export const createPublicKey = (
