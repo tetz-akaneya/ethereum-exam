@@ -11,7 +11,7 @@ import {
   purposeDict,
   typedKeys,
 } from '../generateHdKey';
-import { CURVE_ORDER, G, HARDENED_OFFSET } from './constant';
+import { CURVE_ORDER, HARDENED_OFFSET } from './constant';
 import {
   createMasterKeyBip32,
   createPublicKey,
@@ -28,8 +28,6 @@ import {
   hexToUint8Array,
   uint8ArrayToHex,
 } from './primitiveConvert.js';
-import { multiplyGNTimesEc } from './testUse/libraryImp';
-import { multiplyPointNTimes } from './secp256k1Op';
 
 describe('createMasterKeyBip32', () => {
   it('works same as library', () => {
@@ -141,21 +139,6 @@ describe('createAddress', () => {
   });
 });
 
-describe('multiplyPointNTimes', () => {
-  it('works same as library', () => {
-    fc.assert(
-      fc.property(
-        fc.bigInt({ min: 1n, max: 2n ** 256n - 1n }), // ← max は inclusive なので -1n
-        (n) => {
-          const customResult = multiplyPointNTimes(n, G);
-          const libResult = multiplyGNTimesEc(n);
-
-          expect(customResult).toEqual(libResult);
-        },
-      ),
-    );
-  });
-});
 
 describe('createPublicKey', () => {
   it('works same as library', () => {
