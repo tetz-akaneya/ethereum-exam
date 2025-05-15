@@ -26,7 +26,7 @@ import {
   hexToUint8Array,
   multiplyPointNTimes,
   uint8ArrayToHex,
-} from './convert';
+} from './primitiveConvert.js';
 
 import secp256k1 from 'secp256k1';
 import { Mnemonic } from 'ethers';

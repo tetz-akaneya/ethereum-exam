@@ -14,7 +14,7 @@ import {
   bufferToUint8Array,
   hexToBigInt,
   intToBigInt,
-} from './convert'; // パスを適宜修正
+} from './primitiveConvert.js'; // パスを適宜修正
 
 describe('Conversion functions', () => {
   describe('uint8ArrayToHex and hexToUint8Array', () => {

@@ -9,7 +9,7 @@ import {
   hexToBigInt,
   toBigintModP,
   multiplyPointNTimes,
-} from './convert.js';
+} from './primitiveConvert.js';
 import { HARDENED_OFFSET, CURVE_ORDER, G, Point, modP } from './constant.js';
 import { pbkdf2Sync } from 'crypto';
 

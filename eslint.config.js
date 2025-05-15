@@ -5,6 +5,10 @@ import eslintPluginImport from 'eslint-plugin-import';
 
 export default tseslint.config(
   {
+    extends: [
+      "eslint:recommended",
+      "plugin:prettier/recommended"
+    ],
     files: ['**/*.ts', '**/*.tsx'],
     languageOptions: {
       parser: tseslint.parser,

@@ -7,7 +7,7 @@ import {
   bufferToHex,
   uint8ArrayToBuffer,
   uint8ArrayToHex,
-} from './hdWalletUtils/convert.js';
+} from './hdWalletUtils/primitiveConvert.js';
 
 type AllowedCoinType = 'Ethereum';
 type AllowedPurpose = 'BIP44';
