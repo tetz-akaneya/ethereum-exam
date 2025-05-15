@@ -62,7 +62,7 @@ export const deriveKeyInfoFromMnemonic = (arg: {
 
   return {
     publicKey: uint8ArrayToHex(wallet.publicKey, true),
-    privateKey: bufferToHex(wallet.key, true),
+    privKey: bufferToHex(wallet.privKey, true),
     address: wallet.address,
   };
 };

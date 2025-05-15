@@ -28,7 +28,7 @@ describe('keysForBipPath', () => {
 
     expect(actual).toEqual({
       address: '0xe3c8468a41b17ccfb37324cca0577b9463ad860b',
-      privateKey:
+      privKey:
         '0x27e3b75b734ef80adfcddc1e94ba99000cb11fe7b3c4c0efd8e1defba158042f',
       publicKey:
         '0x03045fae61d46c406f0d6638e336b44bdf3ca2cd25f1691aed99d63983e904d5bc',
@@ -51,7 +51,7 @@ describe('keysForBipPath', () => {
 
     expect(key.address.length).toEqual(42);
     expect(key.publicKey.length).toEqual(68);
-    expect(key.privateKey.length).toEqual(66);
+    expect(key.privKey.length).toEqual(66);
   });
 });
 

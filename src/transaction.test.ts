@@ -27,7 +27,7 @@ const testPrivKey =
 test('signs without error', async () => {
   const signedTx = await signTransaction({
     txData: testTxData,
-    privateKey: testPrivKey,
+    privKey: testPrivKey,
   });
 
   expect(signedTx.startsWith('0x')).toBe(true);
@@ -36,7 +36,7 @@ test('signs without error', async () => {
 test('decodes to correct value', async () => {
   const signedTx = await signTransaction({
     txData: testTxData,
-    privateKey: testPrivKey,
+    privKey: testPrivKey,
   });
   const decodedTx = decodeTx(signedTx);
 

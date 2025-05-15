@@ -4,10 +4,10 @@ import { Transaction, TransactionRequest, Wallet } from 'ethers';
 // ネットワークアクセスにより、解決する実装が含まれるため。
 export const signTransaction = async (arg: {
   txData: TransactionRequest;
-  privateKey: string;
+  privKey: string;
 }) => {
   // オフラインで保持される秘密鍵
-  const wallet = new Wallet(arg.privateKey);
+  const wallet = new Wallet(arg.privKey);
 
   // 署名
   return wallet.signTransaction(arg.txData);

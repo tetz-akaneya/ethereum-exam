@@ -315,7 +315,7 @@ const runAddressCommand = async (options: CommandOptionType) => {
 
   const signedTransaction = await signTransaction({
     txData,
-    privateKey: key.privateKey,
+    privKey: key.privKey,
   });
 
   if (params.mode === 'dryrun') {

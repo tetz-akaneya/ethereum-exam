@@ -28,7 +28,7 @@ export const deriveKeyInfoFromSeed = (arg: {
 
   return {
     publicKey,
-    key: keysForPath.privKey,
+    privKey: keysForPath.privKey,
     chainCode: keysForPath.chainCode,
     address: getEthereumAddress(keysForPath.privKey),
   };

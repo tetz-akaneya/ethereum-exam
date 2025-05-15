@@ -44,7 +44,7 @@ describe('selfmadeDeriveKey', () => {
           });
 
           expect({
-            key: bufferToHex(result.key, true),
+            key: bufferToHex(result.privKey, true),
             chainCode: bufferToHex(result.chainCode, true),
             address: result.address,
           }).toEqual(expected);
