@@ -84,10 +84,9 @@ describe('genBip44Path', () => {
 
 describe('createMnemonic', () => {
   it('should generate 24-word mnemonic when byteSize is 32', () => {
-    const actual = createMnemonic({ byteSize: 32 }).split(' ').length
-    const expected = 24
+    const actual = createMnemonic({ byteSize: 32 }).split(' ').length;
+    const expected = 24;
 
     expect(actual).toEqual(expected);
   });
 });
-

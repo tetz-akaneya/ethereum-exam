@@ -1,7 +1,7 @@
 // ----------------------
 // Convert 関数群
 // ----------------------
-export const appendHexPrefix = (hex: string) => `0x${hex}`
+export const appendHexPrefix = (hex: string) => `0x${hex}`;
 /**
  * Uint8Array → Hex文字列（小文字, プレフィックスなし）
  */
@@ -146,4 +146,3 @@ export const bufferToInt = (buf: Buffer): number => {
   }
   return buf.readUIntBE(0, buf.length);
 };
-

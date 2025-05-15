@@ -1,7 +1,8 @@
-import fc from "fast-check";
-import { G } from "./constant";
-import { multiplyPointNTimes } from "./secp256k1Op";
-import { multiplyGNTimesEc } from "./testUse/libraryImp";
+import fc from 'fast-check';
+
+import { G } from './constant';
+import { multiplyPointNTimes } from './secp256k1Op';
+import { multiplyGNTimesEc } from './testUse/libraryImp';
 
 describe('multiplyPointNTimes', () => {
   it('works same as library', () => {

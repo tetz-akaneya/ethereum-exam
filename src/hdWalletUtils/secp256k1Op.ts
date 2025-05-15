@@ -2,7 +2,7 @@
 // 楕円曲線演算 (secp256k1)
 // ------------------
 
-import { Point, modP } from "./constant";
+import { modP, Point } from './constant';
 
 /**
  * 逆元 a⁻¹ mod p を拡張ユークリッド互除法で計算（a, pは互いに素）
@@ -70,4 +70,3 @@ export const multiplyPointNTimes = (k: bigint, G: Point): Point => {
  * bigint を F_p の正準表現に変換（常に 0 ≦ n < p）
  */
 export const toBigintModP = (n: bigint, p: bigint): bigint => ((n % p) + p) % p;
-

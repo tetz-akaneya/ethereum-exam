@@ -12,7 +12,7 @@ import {
   intToBuffer,
   uint8ArrayToHex,
 } from './primitiveConvert.js';
-import { toBigintModP, multiplyPointNTimes } from './secp256k1Op.js';
+import { multiplyPointNTimes, toBigintModP } from './secp256k1Op.js';
 
 // ----------------------
 // 自作のHDウォレット用関数

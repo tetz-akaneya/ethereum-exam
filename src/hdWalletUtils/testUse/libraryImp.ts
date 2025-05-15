@@ -1,5 +1,6 @@
 import BN from 'bn.js';
 import { curve, ec as EC } from 'elliptic';
+
 import { appendHexPrefix } from '../primitiveConvert';
 
 // test のため

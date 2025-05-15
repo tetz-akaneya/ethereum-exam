@@ -139,7 +139,6 @@ describe('createAddress', () => {
   });
 });
 
-
 describe('createPublicKey', () => {
   it('works same as library', () => {
     fc.assert(
