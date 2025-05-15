@@ -1,14 +1,11 @@
 import eslintPluginPrettier from 'eslint-plugin-prettier';
 import eslintConfigPrettier from 'eslint-config-prettier';
 import tseslint from 'typescript-eslint';
+import eslintPluginUnusedImports from 'eslint-plugin-unused-imports'
 import eslintPluginImport from 'eslint-plugin-import';
 
 export default tseslint.config(
   {
-    extends: [
-      "eslint:recommended",
-      "plugin:prettier/recommended"
-    ],
     files: ['**/*.ts', '**/*.tsx'],
     languageOptions: {
       parser: tseslint.parser,
@@ -20,6 +17,7 @@ export default tseslint.config(
       '@typescript-eslint': tseslint.plugin,
       prettier: eslintPluginPrettier,
       import: eslintPluginImport,
+      'unused-imports': eslintPluginUnusedImports,
     },
     rules: {
       // TypeScriptルール例
@@ -43,6 +41,7 @@ export default tseslint.config(
         ts: 'never',
         tsx: 'never',
       }],
+      'unused-imports/no-unused-imports': 'error',
     },
     settings: {
       'import/resolver': {

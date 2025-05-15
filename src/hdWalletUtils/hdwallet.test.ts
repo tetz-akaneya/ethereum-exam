@@ -1,4 +1,4 @@
-import { ethers, HDNodeWallet, Wallet } from 'ethers';
+import { ethers, Wallet } from 'ethers';
 import * as fc from 'fast-check';
 import {
   createMasterKeyBip32,
