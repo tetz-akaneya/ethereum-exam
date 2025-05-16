@@ -25,8 +25,8 @@ export type PrivateKey = Tagged<_PrivateKey, 'PrivateKey'>;
 export const makePrivateKey = (data: _PrivateKey): PrivateKey => {
   // 長さチェック（BIP32は常に32バイト）
   if (!isValidSecp256k1PrivateKey(data)) {
-    throw new Error('invalid privateKey size')
-  };
+    throw new Error('invalid privateKey size');
+  }
 
   return data as PrivateKey;
 };

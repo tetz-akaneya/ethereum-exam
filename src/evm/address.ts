@@ -13,14 +13,14 @@ export type EvmAddress = Tagged<_EvmAddress, 'Address'>;
 
 export const makeEvmAddress = (data: _EvmAddress) => {
   if (!isValidEvmAddressBytes(data)) {
-    throw new Error('invalid address')
+    throw new Error('invalid address');
   }
 
   return data as EvmAddress;
 };
 
-const isValidEvmAddressBytes = (addr: Uint8Array): boolean => {
-  return addr.length === 20;
+const isValidEvmAddressBytes = (data: Uint8Array): boolean => {
+  return data.length === 20;
 };
 
 export const fromKeyInfo = (keyInfo: KeyInfo): EvmAddress => {
