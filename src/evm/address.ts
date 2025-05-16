@@ -1,19 +1,23 @@
-import { Tagged } from "type-fest"
-import { KeyInfo } from "../hdWalletUtils/keyInfo"
-import { ethers } from "ethers"
-import { PrivateKey, getPublicKeyCompressed } from "../hdWalletUtils/privateKey"
-import { hexToUint8Array } from "../primitive/converter"
+import { ethers } from 'ethers';
+import { Tagged } from 'type-fest';
 
-type _EvmAddress = Uint8Array
-export type EvmAddress = Tagged<_EvmAddress, 'Address'>
+import { KeyInfo } from '../hdWalletUtils/keyInfo';
+import {
+  getPublicKeyCompressed,
+  PrivateKey,
+} from '../hdWalletUtils/privateKey';
+import { hexToUint8Array } from '../primitive/converter';
+
+type _EvmAddress = Uint8Array;
+export type EvmAddress = Tagged<_EvmAddress, 'Address'>;
 
 export const makeEvmAddress = (data: _EvmAddress) => {
-  return data as EvmAddress
-}
+  return data as EvmAddress;
+};
 
 export const fromKeyInfo = (keyInfo: KeyInfo): EvmAddress => {
-  return getEvmAddress(keyInfo.privKey)
-}
+  return getEvmAddress(keyInfo.privKey);
+};
 
 // Ethereumアドレス取得（0x付き、先頭12バイト除去）
 export const getEvmAddress = (privKey: PrivateKey): EvmAddress => {
@@ -23,4 +27,3 @@ export const getEvmAddress = (privKey: PrivateKey): EvmAddress => {
 
   return makeEvmAddress(hexToUint8Array(address));
 };
-

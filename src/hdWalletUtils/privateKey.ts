@@ -1,9 +1,7 @@
 import { createHmac } from 'crypto';
-import { ethers } from 'ethers';
 import { Tagged } from 'type-fest';
 
 import {
-  appendHexPrefix,
   bufferToUint8Array,
   concatUint8Arrays,
   hexToUint8Array,
@@ -34,7 +32,6 @@ export const makePrivateKey = (data: _PrivateKey): PrivateKey => {
 export const getPriavteKeyData = (privateKey: PrivateKey) =>
   privateKey as _PrivateKey;
 
-
 /**
  * 秘密鍵から公開鍵取得
  * BIP32 のN関数
@@ -48,10 +45,7 @@ export const getPublicKeyCompressed = (
     return new Uint8Array();
   }
 
-  const PublicKeyPoint = multiplyPointNTimes(
-    privateKeyBigint,
-    G,
-  );
+  const PublicKeyPoint = multiplyPointNTimes(privateKeyBigint, G);
   const publicKey = serializePoint(PublicKeyPoint, compressed);
 
   return hexToUint8Array(publicKey);

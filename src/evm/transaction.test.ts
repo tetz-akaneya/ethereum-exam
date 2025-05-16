@@ -1,6 +1,6 @@
 import { parseEther, parseUnits, TransactionRequest } from 'ethers';
-import { EvmTransaction } from './transaction';
 
+import { EvmTransaction } from './transaction';
 
 // トランザクションデータ（オンライン側から取得し、オフラインに持ち込む）
 const testTxData: TransactionRequest = {

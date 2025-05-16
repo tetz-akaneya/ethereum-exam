@@ -2,9 +2,9 @@ import { ethers } from 'ethers';
 import fc from 'fast-check';
 
 import {
-  hexToBuffer,
   hexToUint8Array,
   uBigIntToHex,
+  uint8ArrayToBuffer,
 } from '../primitive/converter';
 import {
   changePathDict,
@@ -60,7 +60,9 @@ describe('selfmadeDeriveKey', () => {
 describe('createMasterKey', () => {
   it('works same as library', () => {
     const seed = '000102030405060708090a0b0c0d0e0f';
-    const libWallet = ethers.HDNodeWallet.fromSeed(hexToBuffer(seed));
+    const libWallet = ethers.HDNodeWallet.fromSeed(
+      uint8ArrayToBuffer(hexToUint8Array(seed)),
+    );
     const actual = createMasterKey(makeSeed(hexToUint8Array(seed)));
 
     // buffer での比較が不慣れだったので文字列にして比較

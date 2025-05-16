@@ -2,20 +2,16 @@ import { ethers, Wallet } from 'ethers';
 import fc from 'fast-check';
 import secp256k1 from 'secp256k1';
 
+import { getEvmAddress } from '../evm/address';
 import {
   appendHexPrefix,
   hexToUint8Array,
   uint8ArrayToHex,
 } from '../primitive/converter';
 import { HARDENED_OFFSET } from './derivePath.js';
-import {
-  CKDpriv,
-  getPublicKeyCompressed,
-  makePrivateKey,
-} from './privateKey';
+import { CKDpriv, getPublicKeyCompressed, makePrivateKey } from './privateKey';
 import { CURVE_ORDER } from './secp256k1/point';
 import { createMasterKey, makeSeed } from './seed';
-import { getEvmAddress } from '../evm/address';
 
 describe('createAddress', () => {
   it('works same as library', () => {
@@ -62,9 +58,9 @@ describe('CKDpriv', () => {
       chainCode: I.chainCode,
       index: HARDENED_OFFSET + 0,
     });
-    expect(
-      uint8ArrayToHex(child1.privKey, true),
-    ).toEqual(libWallet.derivePath("m/0'").privateKey);
+    expect(uint8ArrayToHex(child1.privKey, true)).toEqual(
+      libWallet.derivePath("m/0'").privateKey,
+    );
     expect(uint8ArrayToHex(child1.chainCode, true)).toEqual(
       libWallet.derivePath("m/0'").chainCode,
     );
@@ -74,9 +70,9 @@ describe('CKDpriv', () => {
       chainCode: child1.chainCode,
       index: HARDENED_OFFSET + 0,
     });
-    expect(
-      uint8ArrayToHex(child2.privKey, true),
-    ).toEqual(libWallet.derivePath("m/0'/0'").privateKey);
+    expect(uint8ArrayToHex(child2.privKey, true)).toEqual(
+      libWallet.derivePath("m/0'/0'").privateKey,
+    );
     expect(uint8ArrayToHex(child2.chainCode, true)).toEqual(
       libWallet.derivePath("m/0'/0'").chainCode,
     );
@@ -86,9 +82,9 @@ describe('CKDpriv', () => {
       chainCode: child2.chainCode,
       index: 0,
     });
-    expect(
-      uint8ArrayToHex(child3.privKey, true),
-    ).toEqual(libWallet.derivePath("m/0'/0'/0").privateKey);
+    expect(uint8ArrayToHex(child3.privKey, true)).toEqual(
+      libWallet.derivePath("m/0'/0'/0").privateKey,
+    );
     expect(uint8ArrayToHex(child3.chainCode, true)).toEqual(
       libWallet.derivePath("m/0'/0'/0").chainCode,
     );

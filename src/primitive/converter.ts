@@ -50,28 +50,6 @@ export const hexToUint8Array = (hex: string): Uint8Array => {
 };
 
 /**
- * Hex文字列 → Buffer
- */
-export const hexToBuffer = (hex: string): Buffer => {
-  if (hex.length % 2 !== 0) throw new Error('Hex string must have even length');
-  return Buffer.from(hex, 'hex');
-};
-
-/**
- * Buffer → Hex文字列（prefix 付き指定可）
- */
-export const bufferToHex = (buffer: Buffer, prefix = false): string => {
-  const hex = buffer.toString('hex');
-  return prefix ? appendHexPrefix(hex) : hex;
-};
-
-/**
- * Buffer → bigint（BE解釈）
- */
-// export const bufferToUBigInt = (buffer: Buffer): bigint =>
-//   BigInt(appendHexPrefix(buffer.toString('hex')));
-
-/**
  * 符号なし number を Uint8Array に変換（ビッグエンディアン）
  */
 export const uIntToUint8Array = (n: number, byteLength = 4): Uint8Array => {
@@ -165,16 +143,6 @@ export const hexToUBigInt = (hex: string): bigint => {
  */
 export const intToBigInt = (n: number): bigint => {
   return BigInt(n);
-};
-
-/**
- * Buffer → number（最大6byte, BE）
- */
-export const bufferToUInt = (buf: Buffer): number => {
-  if (buf.length > 6) {
-    throw new Error('Too large to safely convert to number');
-  }
-  return buf.readUIntBE(0, buf.length);
 };
 
 export const concatUint8Arrays = (arrays: Uint8Array[]): Uint8Array => {

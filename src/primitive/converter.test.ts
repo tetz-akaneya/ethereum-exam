@@ -1,10 +1,8 @@
 import * as fc from 'fast-check';
 
 import {
-  bufferToHex,
   bufferToUint8Array,
   concatUint8Arrays,
-  hexToBuffer,
   hexToUBigInt,
   hexToUint8Array,
   intToBigInt,
@@ -49,19 +47,6 @@ describe('Conversion functions', () => {
         fc.property(fc.uint8Array(), (arr) => {
           const buf = uint8ArrayToBuffer(arr);
           expect([...buf]).toEqual([...arr]);
-        }),
-      );
-    });
-  });
-
-  describe('hexToBuffer and bufferToHex', () => {
-    it('should round-trip correctly', () => {
-      fc.assert(
-        fc.property(fc.uint8Array(), (arr) => {
-          const hex = uint8ArrayToHex(arr);
-          const buf = hexToBuffer(hex);
-          const roundHex = bufferToHex(buf);
-          expect(roundHex).toBe(hex);
         }),
       );
     });
@@ -117,7 +102,6 @@ describe('Conversion functions', () => {
     });
   });
 
-
   describe('uIntToUint8Array', () => {
     it('should correctly convert uint to Uint8Array and back', () => {
       fc.assert(
@@ -128,7 +112,6 @@ describe('Conversion functions', () => {
             const arr = uIntToUint8Array(n, byteLength);
             expect(arr.length).toBe(byteLength);
 
-
             let decoded = 0n;
             for (let i = 0; i < byteLength; i++) {
               decoded = (decoded << 8n) | BigInt(arr[i]);
@@ -136,9 +119,8 @@ describe('Conversion functions', () => {
 
             const truncated = BigInt(n) % (1n << BigInt(8 * byteLength));
             expect(decoded).toBe(truncated);
-
-          }
-        )
+          },
+        ),
       );
     });
 
@@ -182,8 +164,8 @@ describe('Conversion functions', () => {
             }
 
             expect(decoded).toBe(n);
-          }
-        )
+          },
+        ),
       );
     });
 
@@ -206,7 +188,10 @@ describe('Conversion functions', () => {
             const result = concatUint8Arrays(arrays);
 
             // 長さチェック
-            const expectedLength = arrays.reduce((sum, arr) => sum + arr.length, 0);
+            const expectedLength = arrays.reduce(
+              (sum, arr) => sum + arr.length,
+              0,
+            );
             expect(result.length).toBe(expectedLength);
 
             // 内容チェック
@@ -217,10 +202,9 @@ describe('Conversion functions', () => {
               }
               offset += arr.length;
             }
-          }
-        )
+          },
+        ),
       );
     });
   });
 });
-
