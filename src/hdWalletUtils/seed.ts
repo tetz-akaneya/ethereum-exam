@@ -18,7 +18,7 @@ export const deriveKeyInfoFromSeed = (arg: {
   path: string;
 }) => {
   const parsedPath = parseDerivationPath({
-    path: arg.path
+    path: arg.path,
   });
   const I = createMasterKey(arg.seed);
 

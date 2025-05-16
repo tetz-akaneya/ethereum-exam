@@ -1,6 +1,7 @@
 import { ethers } from 'ethers';
 import fc from 'fast-check';
 
+import { bufferToHex, hexToBuffer, uBigIntToHex } from '../primitive/converter';
 import {
   changePathDict,
   coinTypeDict,
@@ -9,7 +10,6 @@ import {
   typedKeys,
 } from './bip32Path';
 import { createMasterKey, deriveKeyInfoFromSeed } from './seed';
-import { hexToBuffer, uBigIntToHex, bufferToHex } from '../primitive/converter';
 
 describe('selfmadeDeriveKey', () => {
   it('works same as library', () => {

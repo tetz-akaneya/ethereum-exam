@@ -2,11 +2,16 @@ import { ethers, Wallet } from 'ethers';
 import fc from 'fast-check';
 import secp256k1 from 'secp256k1';
 
+import {
+  appendHexPrefix,
+  bufferToHex,
+  hexToBuffer,
+  hexToUint8Array,
+} from '../primitive/converter';
 import { HARDENED_OFFSET } from './bip32Path';
 import { CKDpriv, getEthereumAddress, getPublicKey } from './privateKey';
 import { CURVE_ORDER } from './secp256k1/point';
 import { createMasterKey } from './seed';
-import { appendHexPrefix, hexToUint8Array, hexToBuffer, bufferToHex } from '../primitive/converter';
 
 describe('createAddress', () => {
   it('works same as library', () => {
@@ -51,7 +56,7 @@ describe('selfmadeCKDpriv', () => {
     const child1 = CKDpriv({
       privKey: I.privKey,
       chainCode: I.chainCode,
-      index: HARDENED_OFFSET + 0
+      index: HARDENED_OFFSET + 0,
     });
     expect(bufferToHex(child1.privKey, true)).toEqual(
       wallet.derivePath("m/0'").privateKey,
@@ -75,7 +80,7 @@ describe('selfmadeCKDpriv', () => {
     const child3 = CKDpriv({
       privKey: child2.privKey,
       chainCode: child2.chainCode,
-      index: 0
+      index: 0,
     });
     expect(bufferToHex(child3.chainCode, true)).toEqual(
       wallet.derivePath("m/0'/0'/0").chainCode,

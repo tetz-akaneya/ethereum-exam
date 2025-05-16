@@ -1,16 +1,24 @@
 import { createHmac } from 'crypto';
 import { ethers } from 'ethers';
 
+import {
+  appendHexPrefix,
+  bufferToUBigInt,
+  hexToUBigInt,
+  hexToUint8Array,
+  uBigintToBuffer,
+  uint8ArrayToHex,
+  uIntToBuffer,
+} from '../primitive/converter.js';
 import { HARDENED_OFFSET } from './bip32Path.js';
+import { Fp } from './secp256k1/finite.js';
 import {
   CURVE_ORDER,
   G,
-  primeNumSecp256k1,
   multiplyPointNTimes,
+  primeNumSecp256k1,
   serializePoint,
 } from './secp256k1/point.js';
-import { appendHexPrefix, hexToUBigInt, uint8ArrayToHex, hexToUint8Array, uIntToBuffer, bufferToUBigInt, uBigintToBuffer } from '../primitive/converter.js';
-import { addInModP } from './secp256k1/finite.js';
 
 // Ethereumアドレス取得（0x付き、先頭12バイト除去）
 export const getEthereumAddress = (privKey: Buffer): string => {
@@ -46,9 +54,9 @@ export const getPublicKey = (
  * BIP32 のCKDPriv関数実装
  */
 export const CKDpriv = (arg: {
-  privKey: Buffer,
-  chainCode: Buffer,
-  index: number
+  privKey: Buffer;
+  chainCode: Buffer;
+  index: number;
 }) => {
   const indexBuffer = uIntToBuffer(arg.index, 4);
   let data: Buffer;
@@ -61,7 +69,7 @@ export const CKDpriv = (arg: {
   const I = createHmac('sha512', arg.chainCode).update(data).digest();
   const IL = I.subarray(0, 32);
   const IR = I.subarray(32);
-  const childKeyBn = addInModP(
+  const childKeyBn = Fp.add(
     bufferToUBigInt(IL),
     bufferToUBigInt(arg.privKey),
     CURVE_ORDER,

@@ -1,9 +1,10 @@
 import BN from 'bn.js';
 import elliptic from 'elliptic';
-import { appendHexPrefix } from '../../primitive/converter';
-import { divInModP, subInModP, } from './finite';
 
-const EC = elliptic.ec
+import { appendHexPrefix } from '../../primitive/converter';
+import { Fp } from './finite';
+
+const EC = elliptic.ec;
 
 /** 秘密鍵の上限値（secp256k1 の曲線次数） */
 export const CURVE_ORDER =
@@ -21,7 +22,6 @@ export const G: Point = [
   0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8n,
 ];
 
-
 /**
  * 楕円曲線上の点PとQを加算（加算/倍加とも対応）
  */
@@ -33,14 +33,14 @@ export const pointAdd = (P: Point, Q: Point): Point => {
 
   if (x1 === x2 && y1 === y2) {
     // 点の倍加
-    lambda = divInModP(3n * x1 * x1, 2n * y1, primeNumSecp256k1)
+    lambda = Fp.div(3n * x1 * x1, 2n * y1, primeNumSecp256k1);
   } else {
     // 通常の加算
-    lambda = divInModP(y2 - y1, x2 - x1, primeNumSecp256k1)
+    lambda = Fp.div(y2 - y1, x2 - x1, primeNumSecp256k1);
   }
 
-  const x3 = subInModP(lambda * lambda, x1 + x2, primeNumSecp256k1);
-  const y3 = subInModP(lambda * (x1 - x3), y1, primeNumSecp256k1);
+  const x3 = Fp.sub(lambda * lambda, x1 + x2, primeNumSecp256k1);
+  const y3 = Fp.sub(lambda * (x1 - x3), y1, primeNumSecp256k1);
 
   return [x3, y3];
 };
@@ -62,7 +62,6 @@ export const multiplyPointNTimes = (k: bigint, G: Point): Point => {
 
   return R!;
 };
-
 
 /*
  * bip32 path の公開鍵のシリアライズ関数

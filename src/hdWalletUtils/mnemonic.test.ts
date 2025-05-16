@@ -1,5 +1,6 @@
 import { Mnemonic } from 'ethers';
 
+import { uint8ArrayToHex } from '../primitive/converter';
 import {
   changePathDict,
   coinTypeDict,
@@ -7,7 +8,6 @@ import {
   purposeDict,
 } from './bip32Path';
 import { createMnemonic, deriveKeyInfoFromMnemonic, toSeed } from './mnemonic';
-import { uint8ArrayToHex } from '../primitive/converter';
 
 const passphrase = 'passphrase';
 
@@ -71,8 +71,8 @@ describe('toSeed', () => {
 
     const seed = toSeed(mnemonic, passphrase);
     const libMnemonic = Mnemonic.fromPhrase(mnemonic, passphrase);
-    const actual = uint8ArrayToHex(seed, true)
-    const expected = libMnemonic.computeSeed()
+    const actual = uint8ArrayToHex(seed, true);
+    const expected = libMnemonic.computeSeed();
 
     expect(actual).toEqual(expected);
   });

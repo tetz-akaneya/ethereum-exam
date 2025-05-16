@@ -148,4 +148,3 @@ export const bufferToUInt = (buf: Buffer): number => {
   }
   return buf.readUIntBE(0, buf.length);
 };
-

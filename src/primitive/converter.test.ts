@@ -1,20 +1,20 @@
 import * as fc from 'fast-check';
 
 import {
+  bufferToHex,
+  bufferToUBigInt,
+  bufferToUInt,
+  bufferToUint8Array,
+  hexToBuffer,
+  hexToUBigInt,
+  hexToUint8Array,
+  intToBigInt,
   uBigintToBuffer,
   uBigIntToHex,
   ubigintToUInt,
-  bufferToUBigInt,
-  bufferToHex,
-  bufferToUInt,
-  bufferToUint8Array,
-  hexToUBigInt,
-  hexToBuffer,
-  hexToUint8Array,
-  intToBigInt,
-  uIntToBuffer,
   uint8ArrayToBuffer,
   uint8ArrayToHex,
+  uIntToBuffer,
 } from './converter.js'; // パスを適宜修正
 
 describe('Conversion functions', () => {
