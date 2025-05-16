@@ -1,37 +1,43 @@
 import { ethers } from 'ethers';
 import { Tagged } from 'type-fest';
 
-import { KeyInfo } from '../hdWalletUtils/keyInfo';
+import { KeyInfo } from '../hdWalletUtils/keyInfo.js';
 import {
   getPublicKeyCompressed,
   PrivateKey,
-} from '../hdWalletUtils/privateKey';
-import { hexToUint8Array } from '../primitive/converter';
+} from '../hdWalletUtils/privateKey.js';
+import { hexToUint8Array } from '../primitive/converter.js';
 
 type _EvmAddress = Uint8Array;
-export type EvmAddress = Tagged<_EvmAddress, 'Address'>;
+export type EvmAddressType = Tagged<_EvmAddress, 'Address'>;
 
-export const makeEvmAddress = (data: _EvmAddress) => {
+const make = (data: _EvmAddress) => {
   if (!isValidEvmAddressBytes(data)) {
     throw new Error('invalid address');
   }
 
-  return data as EvmAddress;
+  return data as EvmAddressType;
 };
 
 const isValidEvmAddressBytes = (data: Uint8Array): boolean => {
   return data.length === 20;
 };
 
-export const fromKeyInfo = (keyInfo: KeyInfo): EvmAddress => {
+const fromKeyInfo = (keyInfo: KeyInfo): EvmAddressType => {
   return getEvmAddress(keyInfo.privKey);
 };
 
 // Ethereumアドレス取得（0x付き、先頭12バイト除去）
-export const getEvmAddress = (privKey: PrivateKey): EvmAddress => {
+const getEvmAddress = (privKey: PrivateKey): EvmAddressType => {
   // 非圧縮形式であることに注意
   const pubKey = getPublicKeyCompressed(privKey, false).subarray(1); // 65バイト中、先頭1バイトを除去
   const address = ethers.keccak256(pubKey).slice(-40); // 下位20バイト
 
-  return makeEvmAddress(hexToUint8Array(address));
+  return make(hexToUint8Array(address));
 };
+
+export const EvmAddress = {
+  getEvmAddress,
+  fromKeyInfo,
+  make: make,
+}

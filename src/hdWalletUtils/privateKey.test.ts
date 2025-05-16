@@ -2,7 +2,6 @@ import { ethers, Wallet } from 'ethers';
 import fc from 'fast-check';
 import secp256k1 from 'secp256k1';
 
-import { getEvmAddress } from '../evm/address';
 import {
   appendHexPrefix,
   hexToUint8Array,
@@ -12,6 +11,7 @@ import { HARDENED_OFFSET } from './derivePath.js';
 import { CKDpriv, getPublicKeyCompressed, makePrivateKey } from './privateKey';
 import { CURVE_ORDER } from './secp256k1/point';
 import { createMasterKey, makeSeed } from './seed';
+import { EvmAddress } from '../evm/address';
 
 describe('createAddress', () => {
   it('works same as library', () => {
@@ -20,7 +20,7 @@ describe('createAddress', () => {
         const randomHex = n.toString(16).padStart(64, '0');
         const privKey = makePrivateKey(hexToUint8Array(randomHex));
 
-        const actual = getEvmAddress(privKey);
+        const actual = EvmAddress.getEvmAddress(privKey);
         const libWallet = new Wallet(appendHexPrefix(randomHex));
         const expected = libWallet.address;
 

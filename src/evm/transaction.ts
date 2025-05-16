@@ -30,7 +30,14 @@ const decodeTx = (rawTx: string) => {
   };
 };
 
+const allowedChainToSign = {
+  Sepolia: 11155111
+}
+
 export const EvmTransaction = {
   signTx,
   decodeTx,
+  allowedChainToSign,
 };
+
+

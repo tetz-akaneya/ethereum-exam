@@ -5,6 +5,8 @@ import path from 'path';
 
 import { EvmTransaction } from '../evm/transaction.js';
 import { deriveKeyInfoFromMnemonic } from '../hdWalletUtils/mnemonic.js';
+import { z } from 'zod';
+import { RequestFileJsonType, requestFileSchema } from './requestJson.js';
 
 // ==============================
 // 定数
@@ -32,18 +34,6 @@ type OutputFormatType = 'file' | 'stdout';
 export type OutputFormatStatus = OutputFormatType | 'default' | 'invalid';
 
 type ParamsType = ReturnType<typeof fetchTypedParams>;
-
-type RequestFileJsonType = {
-  maxFeePerGas: string;
-  maxPriorityFeePerGas: string;
-  gasLimit: string;
-  from: string;
-  to: string;
-  value: string;
-  chainId: number;
-  nonce: number;
-  type: number;
-};
 
 type SecreteJsonType = {
   mnemonic: string;
@@ -78,6 +68,14 @@ const formatDateYYYYMMDDHHmmss = (date: Date): string => {
   const ss = String(date.getSeconds()).padStart(2, '0');
   return `${yyyy}${MM}${dd}${HH}${mm}${ss}`;
 };
+
+const optionSchema = z.object({
+  mode: z.enum(['dryrun', 'sign']),
+  requestFile: z.string(),
+  dryrunSign: z.boolean().default(false),
+  secretFile: z.string().default(defaultSecretFile),
+  outputFormat: z.enum(['stdout', 'file']).default(defaultOutputFormat)
+})
 
 // 出力ファイルパスを構築
 const outputFilepath = (subdir: OutputSubDir, unresolvedPath: string) => {
@@ -115,45 +113,6 @@ const readAndParseJsonPath = <T>(pathStr: string): T => {
 // ==============================
 // バリデーション関連
 // ==============================
-// --output-format を検証
-export const getOutputFormatStatus = (
-  outputFormat?: OutputFormatType,
-): OutputFormatStatus => {
-  if (outputFormat === undefined) return 'default';
-  if (outputFormat === 'file' || outputFormat === 'stdout') return outputFormat;
-  return 'invalid';
-};
-
-// --mode を検証
-const getModeStatus = (mode?: ModeType): ModeStatus => {
-  if (mode === undefined) return 'default';
-  if (mode === 'sign' || mode === 'dryrun') return mode;
-  return 'invalid';
-};
-
-// コマンドオプションを検証し、statusを返す
-const validateArgumentFormat = (options: CommandOptionType) => {
-  const outputFormatStatus = getOutputFormatStatus(options.outputFormat);
-  const modeStatus = getModeStatus(options.mode);
-  return { options, outputFormatStatus, modeStatus };
-};
-
-// 検証結果が invalid なら強制終了
-const exitOnValidateResult = (
-  arg: ReturnType<typeof validateArgumentFormat>,
-) => {
-  if (arg.outputFormatStatus === 'invalid') {
-    console.error(
-      `Invalid output-format. received: ${arg.options.outputFormat}.`,
-    );
-    process.exit(1);
-  }
-  if (arg.modeStatus === 'invalid') {
-    console.error(`Invalid mode. received: ${arg.options.mode}.`);
-    process.exit(1);
-  }
-};
-
 // シークレットファイルのパスを検証
 const validateSecretPath = (pathStr: string): ValidateSecretPathResult => {
   const exists = existsSync(path.resolve(pathStr));
@@ -197,41 +156,38 @@ const validateTransaction = (
 // ==============================
 
 // 入力オプションに基づいて必要な情報を構築
-const fetchTypedParams = (options: Partial<CommandOptionType>) => {
+const fetchTypedParams = (options: CommandOptionType) => {
   const now = new Date();
-  const outputFormat: OutputFormatType =
-    getOutputFormatStatus(options.outputFormat) === 'default'
-      ? defaultOutputFormat
-      : options.outputFormat!;
-  const mode: ModeType =
-    getModeStatus(options.mode) === 'default' ? defaultMode : options.mode!;
-  const secretFileOption = options.secretFile || defaultSecretFile;
 
   return {
     now,
-    mode,
-    outputFormat,
-    scretfilePath: path.resolve(secretFileOption),
+    mode: options.mode,
+    outputFormat: options.outputFormat,
+    scretfilePath: path.resolve(options.secretFile),
     requestFile: path.resolve(options.requestFile!),
-    dryrunSign: !!options.dryrunSign,
+    dryrunSign: options.dryrunSign,
     outputPath: outputFilepath(
-      getOutputSubDirname(mode),
+      getOutputSubDirname(options.mode),
       formatDateYYYYMMDDHHmmss(now) + '.json',
     ),
   };
 };
 
-// JSONファイルからTransactionRequestを生成
-export const createTxData = (requestFile: string): TransactionRequest => {
+const readAndParseRequestFileData = (requestFile: string) => {
   const requestData = readAndParseJsonPath<RequestFileJsonType>(requestFile);
 
+  return requestFileSchema.parse(requestData)
+}
+
+// JSONファイルからTransactionRequestを生成
+export const createTxData = (requestData: z.infer<typeof requestFileSchema>): TransactionRequest => {
   return {
-    maxFeePerGas: BigInt(requestData.maxFeePerGas),
-    maxPriorityFeePerGas: BigInt(requestData.maxPriorityFeePerGas),
-    gasLimit: BigInt(requestData.gasLimit),
+    maxFeePerGas: requestData.maxFeePerGas,
+    maxPriorityFeePerGas: requestData.maxPriorityFeePerGas,
+    gasLimit: requestData.gasLimit,
     to: requestData.to,
     from: requestData.from,
-    value: BigInt(requestData.value),
+    value: requestData.value,
     chainId: requestData.chainId,
     nonce: requestData.nonce,
     type: requestData.type,
@@ -301,12 +257,19 @@ const onSignMode = (arg: {
 
 // メインの実行処理
 const runAddressCommand = async (options: CommandOptionType) => {
-  exitOnValidateResult(validateArgumentFormat(options));
-  const params = fetchTypedParams(options);
+  const result = optionSchema.safeParse(options)
+  if (!result.success) {
+    console.error(result.error.format())
+    process.exit(1)
+  }
+  // exitOnValidateResult(validateArgumentFormat(options));
+  const params = fetchTypedParams(result.data);
   exitOnValidateSecretFile(validateSecretPath(params.scretfilePath));
 
   const secret = readAndParseJsonPath<SecreteJsonType>(params.scretfilePath);
-  const txData = createTxData(params.requestFile);
+  const requestData = readAndParseRequestFileData(params.requestFile)
+  const txData = createTxData(requestData);
+
   const txValidationResult = validateTransaction(txData);
 
   if (params.mode === 'dryrun' && !params.dryrunSign) {
