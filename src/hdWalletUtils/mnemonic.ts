@@ -59,7 +59,6 @@ export const deriveKeyInfoFromMnemonic = (arg: {
   return {
     publicKey: uint8ArrayToHex(keyInfo.publicKey, true),
     privKey: uint8ArrayToHex(keyInfo.privKey, true),
-    address: keyInfo.address,
   };
 };
 

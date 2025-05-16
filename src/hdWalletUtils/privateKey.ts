@@ -6,10 +6,8 @@ import {
   appendHexPrefix,
   bufferToUint8Array,
   concatUint8Arrays,
-  hexToUBigInt,
   hexToUint8Array,
   uBigintToUint8Array,
-  uint8ArrayToHex,
   uint8ArrayToUBigInt,
   uIntToUint8Array,
 } from '../primitive/converter.js';
@@ -36,13 +34,6 @@ export const makePrivateKey = (data: _PrivateKey): PrivateKey => {
 export const getPriavteKeyData = (privateKey: PrivateKey) =>
   privateKey as _PrivateKey;
 
-// Ethereumアドレス取得（0x付き、先頭12バイト除去）
-export const getEthereumAddress = (privKey: PrivateKey): string => {
-  // 非圧縮形式であることに注意
-  const pubKey = getPublicKeyCompressed(privKey, false).subarray(1); // 65バイト中、先頭1バイトを除去
-  const address = ethers.keccak256(pubKey).slice(-40); // 下位20バイト
-  return appendHexPrefix(address);
-};
 
 /**
  * 秘密鍵から公開鍵取得

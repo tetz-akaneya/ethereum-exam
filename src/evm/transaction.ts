@@ -2,7 +2,7 @@ import { Transaction, TransactionRequest, Wallet } from 'ethers';
 
 // async なのは、ethersにおいてsignデータにおけるアドレスがENSで記述されている場合に、
 // ネットワークアクセスにより、解決する実装が含まれるため。
-export const signTx = async (arg: {
+const signTx = async (arg: {
   txData: TransactionRequest;
   privKey: string;
 }) => {
@@ -13,7 +13,7 @@ export const signTx = async (arg: {
   return wallet.signTransaction(arg.txData);
 };
 
-export const decodeTx = (rawTx: string) => {
+const decodeTx = (rawTx: string) => {
   const decoded = Transaction.from(rawTx);
   if (!decoded) {
     return null;
@@ -32,3 +32,8 @@ export const decodeTx = (rawTx: string) => {
     type: decoded.type,
   };
 };
+
+export const EvmTransaction = {
+  signTx,
+  decodeTx
+}

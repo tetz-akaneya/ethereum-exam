@@ -1,6 +1,6 @@
 import { parseEther, parseUnits, TransactionRequest } from 'ethers';
+import { EvmTransaction } from './transaction';
 
-import { decodeTx, signTx } from './transaction';
 
 // トランザクションデータ（オンライン側から取得し、オフラインに持ち込む）
 const testTxData: TransactionRequest = {
@@ -25,7 +25,7 @@ const testPrivKey =
   '0xebce77fe4c7df7c3795e6a51b37d5d6ebf21c844d0ed4da8861b0fa7f48f0d1a';
 
 test('signs without error', async () => {
-  const signedTx = await signTx({
+  const signedTx = await EvmTransaction.signTx({
     txData: testTxData,
     privKey: testPrivKey,
   });
@@ -34,11 +34,11 @@ test('signs without error', async () => {
 });
 
 test('decodes to correct value', async () => {
-  const signedTx = await signTx({
+  const signedTx = await EvmTransaction.signTx({
     txData: testTxData,
     privKey: testPrivKey,
   });
-  const decodedTx = decodeTx(signedTx);
+  const decodedTx = EvmTransaction.decodeTx(signedTx);
 
   expect(decodedTx).toStrictEqual({
     chainId: BigInt(testTxData.chainId!),

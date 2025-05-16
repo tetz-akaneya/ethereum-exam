@@ -46,12 +46,10 @@ describe('selfmadeDeriveKey', () => {
           const expected = {
             key: hexToUint8Array(libWallet.privateKey),
             chainCode: hexToUint8Array(libWallet.chainCode),
-            address: libWallet.address.toLowerCase(),
           };
           expect({
             key: actual.privKey,
             chainCode: actual.chainCode,
-            address: actual.address,
           }).toEqual(expected);
         },
       ),

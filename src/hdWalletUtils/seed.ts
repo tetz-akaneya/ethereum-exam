@@ -4,10 +4,8 @@ import type { Tagged } from 'type-fest';
 import { bufferToUint8Array } from '../primitive/converter.js';
 import { parseDerivationPath } from './derivePath.js';
 import { KeyInfo, makeKeyInfo } from './keyInfo.js';
-import { toSeed } from './mnemonic.js';
 import {
   CKDpriv,
-  getEthereumAddress,
   getPublicKeyCompressed,
   makePrivateKey,
 } from './privateKey.js';
@@ -25,7 +23,6 @@ export const createMasterKey = (seed: Seed) => {
   };
 };
 
-export const fromMnemonic = toSeed;
 export const makeSeed = (uint8Array: Uint8Array): Seed => {
   return uint8Array as Seed;
 };
@@ -54,6 +51,5 @@ export const deriveKeyInfoFromSeed = (arg: {
     publicKey: publicKey,
     privKey: keyInfo.privKey,
     chainCode: keyInfo.chainCode,
-    address: getEthereumAddress(keyInfo.privKey),
   });
 };

@@ -1,8 +1,8 @@
 import BN from 'bn.js';
 import elliptic from 'elliptic';
 
-import { appendHexPrefix } from '../../primitive/converter';
-import { Fp } from './finite';
+import { hexToUBigInt } from '../../primitive/converter.js';
+import { Fp } from './finite.js';
 
 const EC = elliptic.ec;
 
@@ -88,7 +88,7 @@ export function multiplyGNTimesEc(n: bigint) {
   const multipliedG = G.mul(new BN(n.toString(10)));
 
   return [
-    BigInt(appendHexPrefix(multipliedG.getX().toString(16))),
-    BigInt(appendHexPrefix(multipliedG.getY().toString(16))),
+    hexToUBigInt(multipliedG.getX().toString(16)),
+    hexToUBigInt(multipliedG.getY().toString(16)),
   ];
 }

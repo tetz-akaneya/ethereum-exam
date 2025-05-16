@@ -10,25 +10,25 @@ import {
 import { HARDENED_OFFSET } from './derivePath.js';
 import {
   CKDpriv,
-  getEthereumAddress,
   getPublicKeyCompressed,
   makePrivateKey,
 } from './privateKey';
 import { CURVE_ORDER } from './secp256k1/point';
 import { createMasterKey, makeSeed } from './seed';
+import { getEvmAddress } from '../evm/address';
 
 describe('createAddress', () => {
   it('works same as library', () => {
     fc.assert(
       fc.property(fc.bigInt({ min: 1n, max: CURVE_ORDER - 1n }), (n) => {
-        const hex = n.toString(16).padStart(64, '0');
-        const privBuf = makePrivateKey(hexToUint8Array(hex));
+        const randomHex = n.toString(16).padStart(64, '0');
+        const privKey = makePrivateKey(hexToUint8Array(randomHex));
 
-        const customResult = getEthereumAddress(privBuf);
-        const wallet = new Wallet(appendHexPrefix(hex));
-        const libResult = wallet.address;
+        const actual = getEvmAddress(privKey);
+        const libWallet = new Wallet(appendHexPrefix(randomHex));
+        const expected = libWallet.address;
 
-        expect(customResult).toEqual(libResult.toLowerCase());
+        expect(uint8ArrayToHex(actual, true)).toEqual(expected.toLowerCase());
       }),
     );
   });

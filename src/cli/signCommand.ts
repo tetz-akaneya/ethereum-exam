@@ -4,7 +4,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import path from 'path';
 
 import { deriveKeyInfoFromMnemonic } from '../hdWalletUtils/mnemonic.js';
-import { signTx } from '../transaction.js';
+import { EvmTransaction } from '../evm/transaction.js';
 
 // ==============================
 // 定数
@@ -319,7 +319,7 @@ const runAddressCommand = async (options: CommandOptionType) => {
     path: secret.derivePath,
   });
 
-  const signedTransaction = await signTx({
+  const signedTransaction = await EvmTransaction.signTx({
     txData,
     privKey: key.privKey,
   });
