@@ -1,12 +1,8 @@
 import { pbkdf2Sync, randomBytes } from 'crypto';
 import { Mnemonic } from 'ethers';
 
-import {
-  bufferToHex,
-  uint8ArrayToBuffer,
-  uint8ArrayToHex,
-} from '../primitive/converter.js';
-import { deriveKeyInfoFromSeed } from './seed.js';
+import { bufferToUint8Array, uint8ArrayToHex } from '../primitive/converter.js';
+import { deriveKeyInfoFromSeed, makeSeed, Seed } from './seed.js';
 
 /*
  * mnemonic を作る。entropyは32byteが推奨。
@@ -29,10 +25,7 @@ export const createMnemonic = (arg: { byteSize: number }) => {
  * @param passphrase パスフレーズ（任意、デフォルト空文字列）
  * @returns 64バイトのシード（Uint8Array）
  */
-export const toSeed = (
-  mnemonic: string,
-  passphrase: string = '',
-): Uint8Array => {
+export const toSeed = (mnemonic: string, passphrase: string = ''): Seed => {
   const normalizedMnemonic = normalizeNfkd(mnemonic);
   const normalizedSalt = 'mnemonic' + normalizeNfkd(passphrase);
 
@@ -44,7 +37,7 @@ export const toSeed = (
     'sha512',
   );
 
-  return new Uint8Array(seed);
+  return makeSeed(bufferToUint8Array(seed));
 };
 
 /*
@@ -56,18 +49,17 @@ export const deriveKeyInfoFromMnemonic = (arg: {
   path: string;
 }) => {
   const seed = toSeed(arg.mnemonic, arg.passphrase);
-  const seedBuf = uint8ArrayToBuffer(seed);
 
-  const wallet = deriveKeyInfoFromSeed({
-    seed: seedBuf,
+  const keyInfo = deriveKeyInfoFromSeed({
+    seed,
     passphrase: arg.passphrase,
     path: arg.path,
   });
 
   return {
-    publicKey: uint8ArrayToHex(wallet.publicKey, true),
-    privKey: bufferToHex(wallet.privKey, true),
-    address: wallet.address,
+    publicKey: uint8ArrayToHex(keyInfo.publicKey, true),
+    privKey: uint8ArrayToHex(keyInfo.privKey, true),
+    address: keyInfo.address,
   };
 };
 

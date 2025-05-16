@@ -2,19 +2,18 @@ import * as fc from 'fast-check';
 
 import {
   bufferToHex,
-  bufferToUBigInt,
-  bufferToUInt,
   bufferToUint8Array,
+  concatUint8Arrays,
   hexToBuffer,
   hexToUBigInt,
   hexToUint8Array,
   intToBigInt,
-  uBigintToBuffer,
   uBigIntToHex,
   ubigintToUInt,
+  uBigintToUint8Array,
   uint8ArrayToBuffer,
   uint8ArrayToHex,
-  uIntToBuffer,
+  uIntToUint8Array,
 } from './converter.js'; // パスを適宜修正
 
 describe('Conversion functions', () => {
@@ -63,30 +62,6 @@ describe('Conversion functions', () => {
           const buf = hexToBuffer(hex);
           const roundHex = bufferToHex(buf);
           expect(roundHex).toBe(hex);
-        }),
-      );
-    });
-  });
-
-  describe('bufferToBigInt and bigintToBuffer', () => {
-    it('should round-trip correctly for 256-bit values', () => {
-      fc.assert(
-        fc.property(fc.bigInt({ min: 0n, max: 2n ** 256n - 1n }), (bn) => {
-          const buf = uBigintToBuffer(bn, 32);
-          const back = bufferToUBigInt(buf);
-          expect(back).toBe(bn);
-        }),
-      );
-    });
-  });
-
-  describe('intToBuffer', () => {
-    it('should encode and decode 4-byte integers correctly', () => {
-      fc.assert(
-        fc.property(fc.integer({ min: 0, max: 0xffffffff }), (n) => {
-          const buf = uIntToBuffer(n, 4);
-          const decoded = buf.readUIntBE(0, 4);
-          expect(decoded).toBe(n);
         }),
       );
     });
@@ -142,15 +117,110 @@ describe('Conversion functions', () => {
     });
   });
 
-  describe('bufferToInt', () => {
-    it('should correctly decode intToBuffer results', () => {
+
+  describe('uIntToUint8Array', () => {
+    it('should correctly convert uint to Uint8Array and back', () => {
       fc.assert(
-        fc.property(fc.integer({ min: 0, max: 0xffffffff }), (n) => {
-          const buf = uIntToBuffer(n, 4);
-          const result = bufferToUInt(buf);
-          expect(result).toBe(n);
-        }),
+        fc.property(
+          fc.integer({ min: 0, max: Number.MAX_SAFE_INTEGER }),
+          fc.constantFrom(1, 2, 3, 4, 6, 8),
+          (n, byteLength) => {
+            const arr = uIntToUint8Array(n, byteLength);
+            expect(arr.length).toBe(byteLength);
+
+
+            let decoded = 0n;
+            for (let i = 0; i < byteLength; i++) {
+              decoded = (decoded << 8n) | BigInt(arr[i]);
+            }
+
+            const truncated = BigInt(n) % (1n << BigInt(8 * byteLength));
+            expect(decoded).toBe(truncated);
+
+          }
+        )
+      );
+    });
+
+    it('should throw on negative or unsafe input', () => {
+      expect(() => uIntToUint8Array(-1)).toThrow();
+      expect(() => uIntToUint8Array(Number.MAX_SAFE_INTEGER + 1)).toThrow();
+      expect(() => uIntToUint8Array(NaN)).toThrow();
+    });
+  });
+
+  describe('uBigintToUint8Array', () => {
+    it('should convert bigint to Uint8Array and back', () => {
+      fc.assert(
+        fc.property(
+          fc.bigInt({
+            min: 0n,
+            max: (1n << 256n) - 1n,
+          }),
+          fc.constantFrom(undefined, 1, 2, 4, 8, 16, 32),
+          (n, byteLength) => {
+            let arr: Uint8Array;
+            try {
+              arr = uBigintToUint8Array(n, byteLength);
+            } catch (e) {
+              // byteLengthが足りずに例外が出た場合、それでOK
+              if (byteLength !== undefined) {
+                const max = 1n << BigInt(8 * byteLength);
+                expect(n >= max).toBe(true);
+                return;
+              }
+              throw e;
+            }
+
+            if (byteLength !== undefined) {
+              expect(arr.length).toBe(byteLength);
+            }
+
+            let decoded = 0n;
+            for (const byte of arr) {
+              decoded = (decoded << 8n) | BigInt(byte);
+            }
+
+            expect(decoded).toBe(n);
+          }
+        )
+      );
+    });
+
+    it('should throw on negative bigint', () => {
+      expect(() => uBigintToUint8Array(-1n)).toThrow();
+    });
+
+    it('should throw if byteLength is too small', () => {
+      const big = 2n ** 64n;
+      expect(() => uBigintToUint8Array(big, 4)).toThrow();
+    });
+  });
+
+  describe('concatUint8Arrays', () => {
+    it('should concatenate arrays preserving order and contents', () => {
+      fc.assert(
+        fc.property(
+          fc.array(fc.uint8Array(), { minLength: 0, maxLength: 100 }),
+          (arrays) => {
+            const result = concatUint8Arrays(arrays);
+
+            // 長さチェック
+            const expectedLength = arrays.reduce((sum, arr) => sum + arr.length, 0);
+            expect(result.length).toBe(expectedLength);
+
+            // 内容チェック
+            let offset = 0;
+            for (const arr of arrays) {
+              for (let i = 0; i < arr.length; i++) {
+                expect(result[offset + i]).toBe(arr[i]);
+              }
+              offset += arr.length;
+            }
+          }
+        )
       );
     });
   });
 });
+

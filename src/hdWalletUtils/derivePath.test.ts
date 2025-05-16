@@ -6,7 +6,7 @@ import {
   genBip44Path,
   purposeDict,
   typedKeys,
-} from './bip32Path';
+} from './derivePath.js';
 
 describe('genBip44Path', () => {
   it('should generate correct BIP44 path format for random path', () => {

@@ -1,15 +1,20 @@
 import { ethers } from 'ethers';
 import fc from 'fast-check';
 
-import { bufferToHex, hexToBuffer, uBigIntToHex } from '../primitive/converter';
+import {
+  hexToBuffer,
+  hexToUint8Array,
+  uBigIntToHex,
+} from '../primitive/converter';
 import {
   changePathDict,
   coinTypeDict,
   genBip44Path,
   purposeDict,
   typedKeys,
-} from './bip32Path';
-import { createMasterKey, deriveKeyInfoFromSeed } from './seed';
+} from './derivePath.js';
+import { PrivateKey } from './privateKey';
+import { createMasterKey, deriveKeyInfoFromSeed, makeSeed } from './seed';
 
 describe('selfmadeDeriveKey', () => {
   it('works same as library', () => {
@@ -29,24 +34,24 @@ describe('selfmadeDeriveKey', () => {
             change: changePathDict[changeKey],
             index,
           });
-          const seed = hexToBuffer(uBigIntToHex(seedNum));
-          const wallet =
+          const seed = makeSeed(hexToUint8Array(uBigIntToHex(seedNum)));
+          const libWallet =
             ethers.HDNodeWallet.fromSeed(seed).derivePath(generatedPath);
-          const expected = {
-            key: wallet.privateKey,
-            chainCode: wallet.chainCode,
-            address: wallet.address.toLowerCase(),
-          };
-          const result = deriveKeyInfoFromSeed({
+          const actual = deriveKeyInfoFromSeed({
             seed,
             passphrase: '',
             path: generatedPath,
           });
 
+          const expected = {
+            key: hexToUint8Array(libWallet.privateKey),
+            chainCode: hexToUint8Array(libWallet.chainCode),
+            address: libWallet.address.toLowerCase(),
+          };
           expect({
-            key: bufferToHex(result.privKey, true),
-            chainCode: bufferToHex(result.chainCode, true),
-            address: result.address,
+            key: actual.privKey,
+            chainCode: actual.chainCode,
+            address: actual.address,
           }).toEqual(expected);
         },
       ),
@@ -54,15 +59,17 @@ describe('selfmadeDeriveKey', () => {
   });
 });
 
-describe('createMasterKeyBip32', () => {
+describe('createMasterKey', () => {
   it('works same as library', () => {
     const seed = '000102030405060708090a0b0c0d0e0f';
-    const seedBuf = hexToBuffer(seed);
-    const wallet = ethers.HDNodeWallet.fromSeed(seedBuf);
-    const actual = createMasterKey(seedBuf);
+    const libWallet = ethers.HDNodeWallet.fromSeed(hexToBuffer(seed));
+    const actual = createMasterKey(makeSeed(hexToUint8Array(seed)));
 
     // buffer での比較が不慣れだったので文字列にして比較
-    expect(bufferToHex(actual.privKey, true)).toEqual(wallet.privateKey);
-    expect(bufferToHex(actual.chainCode, true)).toEqual(wallet.chainCode);
+    expect(actual.privKey).toEqual(hexToUint8Array(libWallet.privateKey));
+    expect(actual.chainCode).toEqual(hexToUint8Array(libWallet.chainCode));
   });
 });
+function getPrivateKeyData(privKey: PrivateKey) {
+  throw new Error('Function not implemented.');
+}

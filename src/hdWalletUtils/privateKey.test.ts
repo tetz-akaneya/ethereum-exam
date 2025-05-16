@@ -4,21 +4,25 @@ import secp256k1 from 'secp256k1';
 
 import {
   appendHexPrefix,
-  bufferToHex,
-  hexToBuffer,
   hexToUint8Array,
+  uint8ArrayToHex,
 } from '../primitive/converter';
-import { HARDENED_OFFSET } from './bip32Path';
-import { CKDpriv, getEthereumAddress, getPublicKey } from './privateKey';
+import { HARDENED_OFFSET } from './derivePath.js';
+import {
+  CKDpriv,
+  getEthereumAddress,
+  getPublicKeyCompressed,
+  makePrivateKey,
+} from './privateKey';
 import { CURVE_ORDER } from './secp256k1/point';
-import { createMasterKey } from './seed';
+import { createMasterKey, makeSeed } from './seed';
 
 describe('createAddress', () => {
   it('works same as library', () => {
     fc.assert(
       fc.property(fc.bigInt({ min: 1n, max: CURVE_ORDER - 1n }), (n) => {
         const hex = n.toString(16).padStart(64, '0');
-        const privBuf = Buffer.from(hex, 'hex');
+        const privBuf = makePrivateKey(hexToUint8Array(hex));
 
         const customResult = getEthereumAddress(privBuf);
         const wallet = new Wallet(appendHexPrefix(hex));
@@ -35,10 +39,10 @@ describe('createPublicKey', () => {
     fc.assert(
       fc.property(fc.bigInt({ min: 1n, max: CURVE_ORDER - 1n }), (n) => {
         const hex = n.toString(16).padStart(64, '0');
-        const privBuf = hexToUint8Array(hex);
+        const privKey = makePrivateKey(hexToUint8Array(hex));
 
-        const P1 = getPublicKey(privBuf, true);
-        const P2 = secp256k1.publicKeyCreate(privBuf, true);
+        const P1 = getPublicKeyCompressed(privKey, true);
+        const P2 = secp256k1.publicKeyCreate(privKey, true);
 
         expect(P1).toEqual(P2);
       }),
@@ -46,23 +50,23 @@ describe('createPublicKey', () => {
   });
 });
 
-describe('selfmadeCKDpriv', () => {
+describe('CKDpriv', () => {
   it('works same as library', () => {
-    const seed = '000102030405060708090a0b0c0d0e0f';
-    const seedBuf = hexToBuffer(seed);
-    const wallet = ethers.HDNodeWallet.fromSeed(seedBuf);
-    const I = createMasterKey(seedBuf);
+    const seedHex = '000102030405060708090a0b0c0d0e0f';
+    const seed = makeSeed(hexToUint8Array(seedHex));
+    const libWallet = ethers.HDNodeWallet.fromSeed(seed);
+    const I = createMasterKey(seed);
 
     const child1 = CKDpriv({
       privKey: I.privKey,
       chainCode: I.chainCode,
       index: HARDENED_OFFSET + 0,
     });
-    expect(bufferToHex(child1.privKey, true)).toEqual(
-      wallet.derivePath("m/0'").privateKey,
-    );
-    expect(bufferToHex(child1.chainCode, true)).toEqual(
-      wallet.derivePath("m/0'").chainCode,
+    expect(
+      uint8ArrayToHex(child1.privKey, true),
+    ).toEqual(libWallet.derivePath("m/0'").privateKey);
+    expect(uint8ArrayToHex(child1.chainCode, true)).toEqual(
+      libWallet.derivePath("m/0'").chainCode,
     );
 
     const child2 = CKDpriv({
@@ -70,11 +74,11 @@ describe('selfmadeCKDpriv', () => {
       chainCode: child1.chainCode,
       index: HARDENED_OFFSET + 0,
     });
-    expect(bufferToHex(child2.chainCode, true)).toEqual(
-      wallet.derivePath("m/0'/0'").chainCode,
-    );
-    expect(bufferToHex(child2.privKey, true)).toEqual(
-      wallet.derivePath("m/0'/0'").privateKey,
+    expect(
+      uint8ArrayToHex(child2.privKey, true),
+    ).toEqual(libWallet.derivePath("m/0'/0'").privateKey);
+    expect(uint8ArrayToHex(child2.chainCode, true)).toEqual(
+      libWallet.derivePath("m/0'/0'").chainCode,
     );
 
     const child3 = CKDpriv({
@@ -82,11 +86,11 @@ describe('selfmadeCKDpriv', () => {
       chainCode: child2.chainCode,
       index: 0,
     });
-    expect(bufferToHex(child3.chainCode, true)).toEqual(
-      wallet.derivePath("m/0'/0'/0").chainCode,
-    );
-    expect(bufferToHex(child3.privKey, true)).toEqual(
-      wallet.derivePath("m/0'/0'/0").privateKey,
+    expect(
+      uint8ArrayToHex(child3.privKey, true),
+    ).toEqual(libWallet.derivePath("m/0'/0'/0").privateKey);
+    expect(uint8ArrayToHex(child3.chainCode, true)).toEqual(
+      libWallet.derivePath("m/0'/0'/0").chainCode,
     );
   });
 });

@@ -68,33 +68,51 @@ export const bufferToHex = (buffer: Buffer, prefix = false): string => {
 /**
  * Buffer → bigint（BE解釈）
  */
-export const bufferToUBigInt = (buffer: Buffer): bigint =>
-  BigInt(appendHexPrefix(buffer.toString('hex')));
+// export const bufferToUBigInt = (buffer: Buffer): bigint =>
+//   BigInt(appendHexPrefix(buffer.toString('hex')));
 
 /**
- * number → Buffer（BE, 固定長, 最大4byte）
+ * 符号なし number を Uint8Array に変換（ビッグエンディアン）
  */
-export const uIntToBuffer = (n: number, byteLength: number): Buffer => {
-  if (!Number.isInteger(n) || n < 0) {
-    throw new Error('Only non-negative integers are supported');
+export const uIntToUint8Array = (n: number, byteLength = 4): Uint8Array => {
+  if (!Number.isSafeInteger(n) || n < 0) {
+    throw new Error('Input must be a non-negative safe integer');
   }
-  const buf = Buffer.alloc(byteLength);
-  buf.writeUIntBE(n, byteLength - 4, 4); // 右詰め
-  return buf;
+
+  const arr = new Uint8Array(byteLength);
+  let x = n;
+  for (let i = byteLength - 1; i >= 0; i--) {
+    arr[i] = x % 256;
+    x = Math.floor(x / 256);
+  }
+  return arr;
 };
-
 /**
- * bigint → Buffer（BE, 固定長, オーバーフロー検出あり）
+ * 符号なし bigint を Uint8Array に変換（ビッグエンディアン）
  */
-export const uBigintToBuffer = (n: bigint, byteSize: number): Buffer => {
-  if (n < 0n) throw new Error('Only non-negative integers are supported');
+export const uBigintToUint8Array = (
+  n: bigint,
+  byteLength?: number,
+): Uint8Array => {
+  if (n < 0n) throw new Error('Cannot convert negative bigint to Uint8Array');
 
-  const hex = n.toString(16).padStart(byteSize * 2, '0');
-  if (hex.length > byteSize * 2) {
-    throw new Error(`Value too large to fit in ${byteSize} bytes`);
+  const hex = n.toString(16).padStart(2, '0');
+  const hexPadded = hex.length % 2 === 0 ? hex : '0' + hex;
+  const arr = new Uint8Array(hexPadded.length / 2);
+
+  for (let i = 0; i < arr.length; i++) {
+    arr[i] = parseInt(hexPadded.slice(i * 2, i * 2 + 2), 16);
   }
 
-  return Buffer.from(hex, 'hex');
+  if (byteLength === undefined) return arr;
+
+  if (arr.length > byteLength) {
+    throw new Error(`Input too large to fit in ${byteLength} bytes`);
+  }
+
+  const padded = new Uint8Array(byteLength);
+  padded.set(arr, byteLength - arr.length); // 右詰め
+  return padded;
 };
 
 /**
@@ -123,6 +141,16 @@ export const bufferToUint8Array = (buf: Buffer): Uint8Array =>
   new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength);
 
 /**
+ * Uint8Array（ビッグエンディアン）を符号なし bigint に変換
+ */
+export const uint8ArrayToUBigInt = (bytes: Uint8Array): bigint => {
+  let result = 0n;
+  for (const byte of bytes) {
+    result = (result << 8n) + BigInt(byte);
+  }
+  return result;
+};
+/**
  * Hex文字列 → bigint（0x付き可）
  */
 export const hexToUBigInt = (hex: string): bigint => {
@@ -147,4 +175,17 @@ export const bufferToUInt = (buf: Buffer): number => {
     throw new Error('Too large to safely convert to number');
   }
   return buf.readUIntBE(0, buf.length);
+};
+
+export const concatUint8Arrays = (arrays: Uint8Array[]): Uint8Array => {
+  const totalLength = arrays.reduce((sum, arr) => sum + arr.length, 0);
+  const result = new Uint8Array(totalLength);
+  let offset = 0;
+
+  for (const arr of arrays) {
+    result.set(arr, offset);
+    offset += arr.length;
+  }
+
+  return result;
 };

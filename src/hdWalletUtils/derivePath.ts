@@ -41,6 +41,7 @@ export const genBip44Path = (arg: {
     arg.index,
   ].join('/');
 };
+
 /**
  * m/44'/60'/0/2/3 -> [2147483692, 2147483708, 0, 2, 3]
  * Hardened indexは 2^31 を加算して表現

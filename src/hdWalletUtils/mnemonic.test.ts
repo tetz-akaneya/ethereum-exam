@@ -6,7 +6,7 @@ import {
   coinTypeDict,
   genBip44Path,
   purposeDict,
-} from './bip32Path';
+} from './derivePath';
 import { createMnemonic, deriveKeyInfoFromMnemonic, toSeed } from './mnemonic';
 
 const passphrase = 'passphrase';

@@ -242,7 +242,9 @@ export const createTxData = (requestFile: string): TransactionRequest => {
 // 出力処理
 // ==============================
 
-// 出力形式に応じた出力
+/*
+ * 出力形式に応じた出力
+ */
 const onOutputFormat = (arg: {
   outputFormat: OutputFormatType;
   params: ParamsType;
@@ -257,7 +259,9 @@ const onOutputFormat = (arg: {
   }
 };
 
-// dryrun モード時の出力
+/*
+ * dryrun モード時の出力
+ */
 const onDryrunMode = (arg: {
   txData: TransactionRequest;
   params: ParamsType;
@@ -273,7 +277,9 @@ const onDryrunMode = (arg: {
   });
 };
 
-// sign モード時の出力
+/*
+ * sign モード時の出力
+ */
 const onSignMode = (arg: {
   params: ParamsType;
   signedTransaction: string;
