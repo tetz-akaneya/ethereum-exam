@@ -29,19 +29,19 @@ export const G: Point = [
 export const pointAdd = (P: Point, Q: Point): Point => {
   const [x1, y1] = P;
   const [x2, y2] = Q;
-  const p = primeNumSecp256k1
 
-  const twoFp = Fp.make({ val: 2n, p: p })
-  const threeFp = Fp.make({ val: 3n, p: p })
-  const x1Fp = Fp.make({ val: x1, p: p })
-  const x2Fp = Fp.make({ val: x2, p: p })
-  const y1Fp = Fp.make({ val: y1, p: p })
-  const y2Fp = Fp.make({ val: y2, p: p })
+  const inFp = Fp.makeFp(primeNumSecp256k1)
+  const twoFp = inFp(2n)
+  const threeFp = inFp(3n)
+  const x1Fp = inFp(x1)
+  const x2Fp = inFp(x2)
+  const y1Fp = inFp(y1)
+  const y2Fp = inFp(y2)
 
   const lambda = iife(() => {
     if (x1 === x2 && y1 === y2) {
       // 点の倍加
-      return Fp.div(Fp.mul(threeFp, Fp.mul(x1Fp, x1Fp)), Fp.mul(twoFp, y1Fp));
+      return Fp.div(Fp.mul(threeFp, x1Fp, x1Fp), Fp.mul(twoFp, y1Fp));
     } else {
       // 通常の加算
       return Fp.div(Fp.sub(y2Fp, y1Fp), Fp.sub(x2Fp, x1Fp));

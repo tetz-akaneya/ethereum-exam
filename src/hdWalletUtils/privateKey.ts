@@ -31,7 +31,6 @@ export const makePrivateKey = (data: _PrivateKey): PrivateKey => {
   return data as PrivateKey;
 };
 
-
 /**
  * 秘密鍵から公開鍵取得
  * BIP32 のN関数
@@ -100,10 +99,11 @@ export const CKDpriv = (arg: {
   const IL = I.subarray(0, 32);
   const IR = I.subarray(32);
 
+  const makeFpCurve = Fp.makeFp(CURVE_ORDER)
   const childKey = uBigintToUint8Array(
     Fp.add(
-      Fp.make({ val: uint8ArrayToUBigInt(IL), p: CURVE_ORDER }),
-      Fp.make({ val: uint8ArrayToUBigInt(arg.privKey), p: CURVE_ORDER }),
+      makeFpCurve(uint8ArrayToUBigInt(IL)),
+      makeFpCurve(uint8ArrayToUBigInt(arg.privKey)),
     ).val,
     32,
   );
