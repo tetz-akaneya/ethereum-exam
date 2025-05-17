@@ -111,8 +111,9 @@ export const CKDpriv = (arg: {
     32,
   );
 
-  if (primeNumSecp256k1 < uint8ArrayToUBigInt(IL))
+  if (uint8ArrayToUBigInt(IL) > primeNumSecp256k1) {
     throw new Error('Derived key is invalid (larger than modP)');
+  }
 
   return {
     privKey: makePrivateKey(childKey),

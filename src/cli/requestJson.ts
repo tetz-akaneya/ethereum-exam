@@ -1,6 +1,7 @@
-import { z } from "zod";
-import { hexToUint8Array } from "../primitive/converter.js";
-import { EvmAddress } from "../evm/address.js";
+import { z } from 'zod';
+
+import { EvmAddress } from '../evm/address.js';
+import { hexToUint8Array } from '../primitive/converter.js';
 
 export type RequestFileJsonType = {
   maxFeePerGas: string;
@@ -16,7 +17,7 @@ export type RequestFileJsonType = {
 
 /**
  * 文字列を非負bigintに変換して返すZodスキーマ
- * 
+ *
  * @param opts - オプション。例えば allowZero: false にすると 0n を不許可にできる
  */
 export const createBigintStringSchema = (opts?: { allowZero?: boolean }) =>
@@ -38,14 +39,18 @@ export const createBigintStringSchema = (opts?: { allowZero?: boolean }) =>
   });
 
 const NonNegativeBigintString = createBigintStringSchema({ allowZero: true });
-const createEvmAddressSchema = (message: string) => z.string().refine((fromAddress: string) => {
-  try {
-    EvmAddress.make(hexToUint8Array(fromAddress))
-  } catch {
-    return false
-  }
-  return true
-}, { message: message })
+const createEvmAddressSchema = (message: string) =>
+  z.string().refine(
+    (fromAddress: string) => {
+      try {
+        EvmAddress.make(hexToUint8Array(fromAddress));
+      } catch {
+        return false;
+      }
+      return true;
+    },
+    { message: message },
+  );
 
 export const requestFileSchema = z.object({
   maxFeePerGas: NonNegativeBigintString,
@@ -56,6 +61,5 @@ export const requestFileSchema = z.object({
   value: NonNegativeBigintString,
   chainId: z.number().gte(0),
   nonce: z.number().gte(0),
-  type: z.literal(2)
-})
-
+  type: z.literal(2),
+});

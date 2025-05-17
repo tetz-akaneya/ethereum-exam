@@ -24,11 +24,11 @@ const isValidEvmAddressBytes = (data: Uint8Array): boolean => {
 };
 
 const fromKeyInfo = (keyInfo: KeyInfo): EvmAddressType => {
-  return getEvmAddress(keyInfo.privKey);
+  return createEvmAddress(keyInfo.privKey);
 };
 
 // Ethereumアドレス取得（0x付き、先頭12バイト除去）
-const getEvmAddress = (privKey: PrivateKey): EvmAddressType => {
+const createEvmAddress = (privKey: PrivateKey): EvmAddressType => {
   // 非圧縮形式であることに注意
   const pubKey = getPublicKeyCompressed(privKey, false).subarray(1); // 65バイト中、先頭1バイトを除去
   const address = ethers.keccak256(pubKey).slice(-40); // 下位20バイト
@@ -37,7 +37,7 @@ const getEvmAddress = (privKey: PrivateKey): EvmAddressType => {
 };
 
 export const EvmAddress = {
-  getEvmAddress,
+  createEvmAddress: createEvmAddress,
   fromKeyInfo,
   make: make,
-}
+};

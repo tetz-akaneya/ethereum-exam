@@ -2,10 +2,10 @@ import { Command } from 'commander';
 import { Transaction, TransactionLike, TransactionRequest } from 'ethers';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import path from 'path';
+import { z } from 'zod';
 
 import { EvmTransaction } from '../evm/transaction.js';
 import { deriveKeyInfoFromMnemonic } from '../hdWalletUtils/mnemonic.js';
-import { z } from 'zod';
 import { RequestFileJsonType, requestFileSchema } from './requestJson.js';
 
 // ==============================
@@ -70,12 +70,12 @@ const formatDateYYYYMMDDHHmmss = (date: Date): string => {
 };
 
 const optionSchema = z.object({
-  mode: z.enum(['dryrun', 'sign']),
+  mode: z.enum(['dryrun', 'sign']).default(defaultMode),
   requestFile: z.string(),
   dryrunSign: z.boolean().default(false),
   secretFile: z.string().default(defaultSecretFile),
-  outputFormat: z.enum(['stdout', 'file']).default(defaultOutputFormat)
-})
+  outputFormat: z.enum(['stdout', 'file']).default(defaultOutputFormat),
+});
 
 // 出力ファイルパスを構築
 const outputFilepath = (subdir: OutputSubDir, unresolvedPath: string) => {
@@ -176,11 +176,13 @@ const fetchTypedParams = (options: CommandOptionType) => {
 const readAndParseRequestFileData = (requestFile: string) => {
   const requestData = readAndParseJsonPath<RequestFileJsonType>(requestFile);
 
-  return requestFileSchema.parse(requestData)
-}
+  return requestFileSchema.parse(requestData);
+};
 
 // JSONファイルからTransactionRequestを生成
-export const createTxData = (requestData: z.infer<typeof requestFileSchema>): TransactionRequest => {
+export const createTxData = (
+  requestData: z.infer<typeof requestFileSchema>,
+): TransactionRequest => {
   return {
     maxFeePerGas: requestData.maxFeePerGas,
     maxPriorityFeePerGas: requestData.maxPriorityFeePerGas,
@@ -257,17 +259,17 @@ const onSignMode = (arg: {
 
 // メインの実行処理
 const runAddressCommand = async (options: CommandOptionType) => {
-  const result = optionSchema.safeParse(options)
+  const result = optionSchema.safeParse(options);
   if (!result.success) {
-    console.error(result.error.format())
-    process.exit(1)
+    console.error(result.error.format());
+    process.exit(1);
   }
   // exitOnValidateResult(validateArgumentFormat(options));
   const params = fetchTypedParams(result.data);
   exitOnValidateSecretFile(validateSecretPath(params.scretfilePath));
 
   const secret = readAndParseJsonPath<SecreteJsonType>(params.scretfilePath);
-  const requestData = readAndParseRequestFileData(params.requestFile)
+  const requestData = readAndParseRequestFileData(params.requestFile);
   const txData = createTxData(requestData);
 
   const txValidationResult = validateTransaction(txData);
@@ -313,7 +315,7 @@ export const createSignCommand = () => {
 
   command
     .description('Signs transaction.')
-    .requiredOption('--mode <string>', '"dryrun" | "sign"')
+    .option('--mode <string>', `"dryrun" | "sign". Default is ${defaultMode}`)
     .option(
       '--dryrun-sign',
       'Validate params by doing sign. Only works when mode is "dryrun"',
