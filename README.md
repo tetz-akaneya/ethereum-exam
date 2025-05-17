@@ -30,7 +30,7 @@ ethereum_exam sign -h
 ```
 
 ### secret_params.json を配置
-推奨配置位置: <project-root>/secret_params.json
+推奨配置位置: `<project-root>/secret_params.json`
 
 ```
 {
@@ -51,7 +51,7 @@ typeは、EIP1559の場合は2を指定。
 
 from は、mnemonic + derivePathから生成されるアドレスと一致することが必要。
 
-推奨配置位置: <project-root>/private_request/request_xxx.json
+推奨配置位置: `<project-root>/private_request/request_xxx.json`
 
 
 例(フォーマット)
@@ -59,7 +59,7 @@ from は、mnemonic + derivePathから生成されるアドレスと一致する
 {
   "maxFeePerGas": "3000000000",
   "maxPriorityFeePerGas": "3000000000",
-  "gasLimit": 21000,
+  "gasLimit": "21000",
   "from": "<your source address>",
   "to": "0x10Fb3dDc48495E708257f62e57E6576331ab2438",
   "value": "1000000000",
