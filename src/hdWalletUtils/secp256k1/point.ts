@@ -2,7 +2,8 @@ import BN from 'bn.js';
 import elliptic from 'elliptic';
 
 import { hexToUBigInt } from '../../primitive/converter.js';
-import { Fp } from './finite.js';
+import { FiniteP, Fp } from './finite.js';
+import { iife } from '../../primitive/iife.js';
 
 const EC = elliptic.ec;
 
@@ -28,22 +29,30 @@ export const G: Point = [
 export const pointAdd = (P: Point, Q: Point): Point => {
   const [x1, y1] = P;
   const [x2, y2] = Q;
+  const p = primeNumSecp256k1
 
-  let lambda: bigint;
+  const twoFp = Fp.make({ val: 2n, p: p })
+  const threeFp = Fp.make({ val: 3n, p: p })
+  const x1Fp = Fp.make({ val: x1, p: p })
+  const x2Fp = Fp.make({ val: x2, p: p })
+  const y1Fp = Fp.make({ val: y1, p: p })
+  const y2Fp = Fp.make({ val: y2, p: p })
 
-  if (x1 === x2 && y1 === y2) {
-    // 点の倍加
-    lambda = Fp.div(3n * x1 * x1, 2n * y1, primeNumSecp256k1);
-  } else {
-    // 通常の加算
-    lambda = Fp.div(y2 - y1, x2 - x1, primeNumSecp256k1);
-  }
+  const lambda = iife(() => {
+    if (x1 === x2 && y1 === y2) {
+      // 点の倍加
+      return Fp.div(Fp.mul(threeFp, Fp.mul(x1Fp, x1Fp)), Fp.mul(twoFp, y1Fp));
+    } else {
+      // 通常の加算
+      return Fp.div(Fp.sub(y2Fp, y1Fp), Fp.sub(x2Fp, x1Fp));
+    }
+  });
 
-  const x3 = Fp.sub(lambda * lambda, x1 + x2, primeNumSecp256k1);
-  const y3 = Fp.sub(lambda * (x1 - x3), y1, primeNumSecp256k1);
+  const x3Fp = Fp.sub(Fp.mul(lambda, lambda), Fp.add(x1Fp, x2Fp));
+  const y3Fp = Fp.sub(Fp.mul(lambda, Fp.sub(x1Fp, x3Fp)), y1Fp);
 
-  return [x3, y3];
-};
+  return [x3Fp.val, y3Fp.val];
+}
 
 /**
  * 楕円曲線上の点 G にスカラー k をかける（k倍演算）

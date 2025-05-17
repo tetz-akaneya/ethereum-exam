@@ -31,8 +31,6 @@ export const makePrivateKey = (data: _PrivateKey): PrivateKey => {
   return data as PrivateKey;
 };
 
-export const getPriavteKeyData = (privateKey: PrivateKey) =>
-  privateKey as _PrivateKey;
 
 /**
  * 秘密鍵から公開鍵取得
@@ -84,7 +82,7 @@ export const CKDpriv = (arg: {
     if (arg.index >= HARDENED_OFFSET) {
       return concatUint8Arrays([
         Uint8Array.from([0x00]),
-        getPriavteKeyData(arg.privKey),
+        arg.privKey,
         indexUint8Array,
       ]);
     } else {
@@ -104,10 +102,9 @@ export const CKDpriv = (arg: {
 
   const childKey = uBigintToUint8Array(
     Fp.add(
-      uint8ArrayToUBigInt(IL),
-      uint8ArrayToUBigInt(getPriavteKeyData(arg.privKey)),
-      CURVE_ORDER,
-    ),
+      Fp.make({ val: uint8ArrayToUBigInt(IL), p: CURVE_ORDER }),
+      Fp.make({ val: uint8ArrayToUBigInt(arg.privKey), p: CURVE_ORDER }),
+    ).val,
     32,
   );
 
