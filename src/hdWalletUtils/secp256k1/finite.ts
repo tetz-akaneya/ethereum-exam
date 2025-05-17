@@ -2,79 +2,74 @@
 // 数学ユーティリティ (有限体, finite field)
 // ------------------
 
-import { Tagged } from "type-fest";
+import { Tagged } from 'type-fest';
 
 /**
  * bigint を F_p の正準表現に変換（常に 0 ≦ n < p）
  * JavaScriptの `%` は剰余（remainder）で負値を返す可能性があるため、正の代表元を得るために補正する。
  */
 const toBigintModP = (n: bigint, p: bigint): bigint => ((n % p) + p) % p;
-const zero = 0n
-const one = 1n
+const zero = 0n;
+const one = 1n;
 
 type _FiniteP = {
-  readonly val: bigint
-  readonly p: bigint
-}
-export type FiniteP = Tagged<_FiniteP, 'FiniteP'>
+  readonly val: bigint;
+  readonly p: bigint;
+};
+export type FiniteP = Tagged<_FiniteP, 'FiniteP'>;
 
-const makeFiniteP = (p: _FiniteP['p']) => (val: _FiniteP['val']): FiniteP => {
-  if (p <= 1) throw new Error('p should be a prime')
+const makeFiniteP =
+  (p: _FiniteP['p']) =>
+    (val: _FiniteP['val']): FiniteP => {
+      if (p <= 1n) throw new Error('p should be a prime');
 
-  return {
-    val: toBigintModP(val, p),
-    p: p
-  } as FiniteP
-}
+      return {
+        val: toBigintModP(val, p),
+        p,
+      } as FiniteP;
+    };
 
 // 和
 const addInModP = (...as: FiniteP[]): FiniteP => {
-  if (as.length < 2) throw new Error('at least 2 elements')
+  if (as.length < 2)
+    throw new Error('add requires at least 2 elements required.');
 
   const p = as[0].p;
 
-  const isValidP = as.every((a) => {
-    return a.p === p
-  })
-
-  if (!isValidP) throw new Error('invalid p')
+  assertInSameP(...as);
 
   const val = as.reduce((acc, a) => {
-    return acc + a.val
-  }, zero)
+    return acc + a.val;
+  }, zero);
 
   return makeFiniteP(p)(val);
 };
 
 // 差
 const subInModP = (a: FiniteP, b: FiniteP): FiniteP => {
-  if (a.p !== b.p) throw new Error('invalid p')
+  assertInSameP(a, b);
 
   return makeFiniteP(a.p)(a.val - b.val);
 };
 
 // 積
 const mulInModP = (...as: FiniteP[]): FiniteP => {
-  if (as.length < 2) throw new Error('at least 2 elements')
+  if (as.length < 2) throw new Error('mul requires at least 2 elements');
   const p = as[0].p;
 
-  const isValidP = as.every((a) => {
-    return a.p === p
-  })
-
-  if (!isValidP) throw new Error('invalid p')
+  assertInSameP(...as);
 
   const val = as.reduce((acc, a) => {
-    return acc * a.val
-  }, one)
+    return acc * a.val;
+  }, one);
 
   return makeFiniteP(p)(val);
 };
 
 // 商
 const divInModP = (a: FiniteP, b: FiniteP): FiniteP => {
-  if (a.p !== b.p) throw new Error('invalid p')
-  if (b.val === 0n) throw new Error('Division by zero in F_p');
+  assertInSameP(a, b);
+  if (b.val === zero) throw new Error('Division by zero in F_p');
 
   return mulInModP(a, inverseOfInModP(b));
 };
@@ -92,6 +87,17 @@ const inverseOfInModP = (a: FiniteP): FiniteP => {
   if (r > 1n) throw new Error(`${a.val} has no inverse modulo ${a.p}`);
 
   return makeFiniteP(a.p)(t);
+};
+
+const assertInSameP = (...fps: FiniteP[]) => {
+  if (fps.length === 0) return;
+  const p = fps[0].p;
+  const hasSame = fps.every((fp) => {
+    return p === fp.p;
+  });
+  if (hasSame) return;
+
+  throw new Error('fps has indifferent p');
 };
 
 export const Fp = {

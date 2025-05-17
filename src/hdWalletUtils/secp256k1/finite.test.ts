@@ -1,8 +1,9 @@
-import fc from "fast-check";
-import { Fp } from "./finite";
+import fc from 'fast-check';
 
-describe("Fp basic arithmetic", () => {
-  test("basic addition, subtraction, multiplication, division", () => {
+import { Fp } from './finite';
+
+describe('Fp basic arithmetic', () => {
+  test('basic addition, subtraction, multiplication, division', () => {
     const p = 7n;
     const make = Fp.makeFp(p);
     const a = make(3n);
@@ -14,7 +15,7 @@ describe("Fp basic arithmetic", () => {
     expect(Fp.div(a, b).val).toBe(2n);
   });
 
-  test("additive identity and inverse", () => {
+  test('additive identity and inverse', () => {
     const p = 11n;
     const make = Fp.makeFp(p);
     const a = make(7n);
@@ -24,7 +25,7 @@ describe("Fp basic arithmetic", () => {
     expect(Fp.sub(a, a).val).toBe(0n);
   });
 
-  test("multiplicative identity and inverse", () => {
+  test('multiplicative identity and inverse', () => {
     const p = 13n;
     const make = Fp.makeFp(p);
     for (let i = 1n; i < p; i++) {
@@ -35,7 +36,7 @@ describe("Fp basic arithmetic", () => {
     }
   });
 
-  test("distributive law", () => {
+  test('distributive law', () => {
     const p = 17n;
     const make = Fp.makeFp(p);
     const a = make(3n);
@@ -47,20 +48,20 @@ describe("Fp basic arithmetic", () => {
     expect(left.val).toBe(right.val);
   });
 
-  test("negative value is normalized", () => {
+  test('negative value is normalized', () => {
     const p = 17n;
     const make = Fp.makeFp(p);
     const a = make(-5n);
     expect(a.val).toBe(12n); // (-5 mod 17) = 12
   });
 
-  test("throws on mismatched p", () => {
+  test('throws on mismatched p', () => {
     const a = Fp.makeFp(11n)(1n);
     const b = Fp.makeFp(13n)(2n);
     expect(() => Fp.add(a, b)).toThrow(/invalid p/);
   });
 
-  test("throws on division by zero", () => {
+  test('throws on division by zero', () => {
     const p = 7n;
     const make = Fp.makeFp(p);
     const a = make(3n);
@@ -76,26 +77,26 @@ describe("Fp basic arithmetic", () => {
 const arbFp = (p: bigint) =>
   fc.bigInt({ min: 0n, max: p - 1n }).map((n) => Fp.makeFp(p)(n));
 
-describe("Fp property-based tests", () => {
+describe('Fp property-based tests', () => {
   const p = 101n;
 
-  test("addition is commutative", () => {
+  test('addition is commutative', () => {
     fc.assert(
       fc.property(arbFp(p), arbFp(p), (a, b) => {
         const ab = Fp.add(a, b).val;
         const ba = Fp.add(b, a).val;
         expect(ab).toBe(ba);
-      })
+      }),
     );
   });
 
-  test("multiplication is associative", () => {
+  test('multiplication is associative', () => {
     fc.assert(
       fc.property(arbFp(p), arbFp(p), arbFp(p), (a, b, c) => {
         const left = Fp.mul(Fp.mul(a, b), c).val;
         const right = Fp.mul(a, Fp.mul(b, c)).val;
         expect(left).toBe(right);
-      })
+      }),
     );
   });
 });

@@ -99,7 +99,7 @@ export const CKDpriv = (arg: {
   const IL = I.subarray(0, 32);
   const IR = I.subarray(32);
 
-  const makeFpCurve = Fp.makeFp(CURVE_ORDER)
+  const makeFpCurve = Fp.makeFp(CURVE_ORDER);
   const childKey = uBigintToUint8Array(
     Fp.add(
       makeFpCurve(uint8ArrayToUBigInt(IL)),

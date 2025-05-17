@@ -2,8 +2,8 @@ import BN from 'bn.js';
 import elliptic from 'elliptic';
 
 import { hexToUBigInt } from '../../primitive/converter.js';
-import { FiniteP, Fp } from './finite.js';
 import { iife } from '../../primitive/iife.js';
+import { Fp } from './finite.js';
 
 const EC = elliptic.ec;
 
@@ -30,13 +30,13 @@ export const pointAdd = (P: Point, Q: Point): Point => {
   const [x1, y1] = P;
   const [x2, y2] = Q;
 
-  const inFp = Fp.makeFp(primeNumSecp256k1)
-  const twoFp = inFp(2n)
-  const threeFp = inFp(3n)
-  const x1Fp = inFp(x1)
-  const x2Fp = inFp(x2)
-  const y1Fp = inFp(y1)
-  const y2Fp = inFp(y2)
+  const inFp = Fp.makeFp(primeNumSecp256k1);
+  const twoFp = inFp(2n);
+  const threeFp = inFp(3n);
+  const x1Fp = inFp(x1);
+  const x2Fp = inFp(x2);
+  const y1Fp = inFp(y1);
+  const y2Fp = inFp(y2);
 
   const lambda = iife(() => {
     if (x1 === x2 && y1 === y2) {
@@ -52,7 +52,7 @@ export const pointAdd = (P: Point, Q: Point): Point => {
   const y3Fp = Fp.sub(Fp.mul(lambda, Fp.sub(x1Fp, x3Fp)), y1Fp);
 
   return [x3Fp.val, y3Fp.val];
-}
+};
 
 /**
  * 楕円曲線上の点 G にスカラー k をかける（k倍演算）
