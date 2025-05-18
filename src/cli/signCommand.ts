@@ -264,7 +264,6 @@ const runAddressCommand = async (options: CommandOptionType) => {
     console.error(result.error.format())
     process.exit(1)
   }
-  // exitOnValidateResult(validateArgumentFormat(options));
   const params = fetchTypedParams(result.data)
   exitOnValidateSecretFile(validateSecretPath(params.scretfilePath))
 

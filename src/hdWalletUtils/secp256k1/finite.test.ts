@@ -58,7 +58,7 @@ describe('Fp basic arithmetic', () => {
   test('throws on mismatched p', () => {
     const a = Fp.makeFp(11n)(1n)
     const b = Fp.makeFp(13n)(2n)
-    expect(() => Fp.add(a, b)).toThrow(/invalid p/)
+    expect(() => Fp.add(a, b)).toThrow(/fps has mismatched p/)
   })
 
   test('throws on division by zero', () => {

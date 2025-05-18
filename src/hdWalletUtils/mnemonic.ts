@@ -3,6 +3,7 @@ import { Mnemonic } from 'ethers'
 
 import { bufferToUint8Array, uint8ArrayToHex } from '../primitive/converter.js'
 import { deriveKeyInfoFromSeed, makeSeed, Seed } from './seed.js'
+import { makePrivateKey } from './privateKey.js'
 
 /*
  * mnemonic を作る。entropyは32byteが推奨。
@@ -58,7 +59,7 @@ export const deriveKeyInfoFromMnemonic = (arg: {
 
   return {
     publicKey: uint8ArrayToHex(keyInfo.publicKey, true),
-    privKey: uint8ArrayToHex(keyInfo.privKey, true),
+    privKey: makePrivateKey(keyInfo.privKey),
   }
 }
 

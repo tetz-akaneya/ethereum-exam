@@ -20,14 +20,14 @@ export type FiniteP = Tagged<_FiniteP, 'FiniteP'>
 
 const makeFiniteP =
   (p: _FiniteP['p']) =>
-  (val: _FiniteP['val']): FiniteP => {
-    if (p <= 1n) throw new Error('p should be a prime')
+    (val: _FiniteP['val']): FiniteP => {
+      if (p <= 1n) throw new Error('p should be a prime')
 
-    return {
-      val: toBigintModP(val, p),
-      p,
-    } as FiniteP
-  }
+      return {
+        val: toBigintModP(val, p),
+        p,
+      } as FiniteP
+    }
 
 // 和
 const addInModP = (...as: FiniteP[]): FiniteP => {
@@ -80,9 +80,9 @@ const inverseOfInModP = (a: FiniteP): FiniteP => {
   let [r, newR] = [a.p, a.val]
 
   while (newR !== 0n) {
-    const q = r / newR
-    ;[t, newT] = [newT, t - q * newT]
-    ;[r, newR] = [newR, r - q * newR]
+    const q = r / newR;
+    [t, newT] = [newT, t - q * newT];
+    [r, newR] = [newR, r - q * newR];
   }
   if (r > 1n) throw new Error(`${a.val} has no inverse modulo ${a.p}`)
 
@@ -97,7 +97,7 @@ const assertInSameP = (...fps: FiniteP[]) => {
   })
   if (hasSame) return
 
-  throw new Error('fps has indifferent p')
+  throw new Error('fps has mismatched p')
 }
 
 export const Fp = {
