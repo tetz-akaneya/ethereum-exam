@@ -1,7 +1,7 @@
 import { Transaction, TransactionRequest, Wallet } from 'ethers'
 
-import { PrivateKey } from '../hdWalletUtils/privateKey'
-import { uint8ArrayToHex } from '../primitive/converter'
+import { PrivateKey } from '../hdWalletUtils/privateKey.js'
+import { uint8ArrayToHex } from '../primitive/converter.js'
 
 // async なのは、ethersにおいてsignデータにおけるアドレスがENSで記述されている場合に、
 // ネットワークアクセスにより、解決する実装が含まれるため。
