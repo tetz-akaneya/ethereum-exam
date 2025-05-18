@@ -20,14 +20,14 @@ export type FiniteP = Tagged<_FiniteP, 'FiniteP'>;
 
 const makeFiniteP =
   (p: _FiniteP['p']) =>
-    (val: _FiniteP['val']): FiniteP => {
-      if (p <= 1n) throw new Error('p should be a prime');
+  (val: _FiniteP['val']): FiniteP => {
+    if (p <= 1n) throw new Error('p should be a prime');
 
-      return {
-        val: toBigintModP(val, p),
-        p,
-      } as FiniteP;
-    };
+    return {
+      val: toBigintModP(val, p),
+      p,
+    } as FiniteP;
+  };
 
 // 和
 const addInModP = (...as: FiniteP[]): FiniteP => {

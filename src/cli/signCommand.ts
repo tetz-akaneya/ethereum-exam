@@ -315,7 +315,7 @@ export const createSignCommand = () => {
 
   command
     .description('Signs transaction.')
-    .option('--mode <string>', `"dryrun" | "sign". Default is ${defaultMode}`)
+    .option('--mode <string>', `"dryrun" | "sign". Default is "${defaultMode}"`)
     .option(
       '--dryrun-sign',
       'Validate params by doing sign. Only works when mode is "dryrun"',

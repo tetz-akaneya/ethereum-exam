@@ -110,14 +110,14 @@ Options:
 ```
 
 ```
-ethereum_exam sign -h
+ ethereum_exam sign -h
 
 Usage: ethereum_exam sign [options]
 
 Signs transaction.
 
 Options:
-  --mode <string>           "dryrun" | "sign"
+  --mode <string>           "dryrun" | "sign". Default is dryrun
   --dryrun-sign             Validate params by doing sign. Only works when mode is "dryrun"
   --output-format <string>  "file" | "stdout". Default is "stdout".
   --secret-file <string>    Path to secret file. Default is "secret_params.json"

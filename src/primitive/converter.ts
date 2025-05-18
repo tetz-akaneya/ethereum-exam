@@ -126,6 +126,7 @@ export const uint8ArrayToUBigInt = (bytes: Uint8Array): bigint => {
   for (const byte of bytes) {
     result = (result << 8n) + BigInt(byte);
   }
+
   return result;
 };
 /**
