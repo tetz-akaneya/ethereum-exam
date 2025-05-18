@@ -1,19 +1,19 @@
-import { z } from 'zod';
+import { z } from 'zod'
 
-import { EvmAddress } from '../evm/address.js';
-import { hexToUint8Array } from '../primitive/converter.js';
+import { EvmAddress } from '../evm/address.js'
+import { hexToUint8Array } from '../primitive/converter.js'
 
 export type RequestFileJsonType = {
-  maxFeePerGas: string;
-  maxPriorityFeePerGas: string;
-  gasLimit: string;
-  from: string;
-  to: string;
-  value: string;
-  chainId: number;
-  nonce: number;
-  type: number;
-};
+  maxFeePerGas: string
+  maxPriorityFeePerGas: string
+  gasLimit: string
+  from: string
+  to: string
+  value: string
+  chainId: number
+  nonce: number
+  type: number
+}
 
 /**
  * 文字列を非負bigintに変換して返すZodスキーマ
@@ -23,34 +23,34 @@ export type RequestFileJsonType = {
 export const createBigintStringSchema = (opts?: { allowZero?: boolean }) =>
   z.string().transform((val, ctx) => {
     try {
-      const num = BigInt(val);
-      const isValid = opts?.allowZero ? num >= 0n : num > 0n;
+      const num = BigInt(val)
+      const isValid = opts?.allowZero ? num >= 0n : num > 0n
 
-      if (!isValid) throw new Error();
+      if (!isValid) throw new Error()
 
-      return num;
+      return num
     } catch {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: `Must be a string representing a ${opts?.allowZero ? 'non-negative' : 'positive'} integer (bigint)`,
-      });
-      return z.NEVER;
+      })
+      return z.NEVER
     }
-  });
+  })
 
-const NonNegativeBigintString = createBigintStringSchema({ allowZero: true });
+const NonNegativeBigintString = createBigintStringSchema({ allowZero: true })
 const createEvmAddressSchema = (message: string) =>
   z.string().refine(
     (fromAddress: string) => {
       try {
-        EvmAddress.make(hexToUint8Array(fromAddress));
+        EvmAddress.make(hexToUint8Array(fromAddress))
       } catch {
-        return false;
+        return false
       }
-      return true;
+      return true
     },
     { message: message },
-  );
+  )
 
 export const requestFileSchema = z.object({
   maxFeePerGas: NonNegativeBigintString,
@@ -62,4 +62,4 @@ export const requestFileSchema = z.object({
   chainId: z.number().gte(0),
   nonce: z.number().gte(0),
   type: z.literal(2),
-});
+})

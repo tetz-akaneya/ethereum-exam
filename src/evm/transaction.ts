@@ -1,19 +1,26 @@
-import { Transaction, TransactionRequest, Wallet } from 'ethers';
+import { Transaction, TransactionRequest, Wallet } from 'ethers'
+
+import { PrivateKey } from '../hdWalletUtils/privateKey'
+import { uint8ArrayToHex } from '../primitive/converter'
 
 // async なのは、ethersにおいてsignデータにおけるアドレスがENSで記述されている場合に、
 // ネットワークアクセスにより、解決する実装が含まれるため。
-const signTx = async (arg: { txData: TransactionRequest; privKey: string }) => {
+const signTx = async (arg: {
+  txData: TransactionRequest
+  privKey: PrivateKey
+}) => {
   // オフラインで保持される秘密鍵
-  const wallet = new Wallet(arg.privKey);
+  const wallet = new Wallet(uint8ArrayToHex(arg.privKey))
+  uint8ArrayToHex
 
   // 署名
-  return wallet.signTransaction(arg.txData);
-};
+  return wallet.signTransaction(arg.txData)
+}
 
 const decodeTx = (rawTx: string) => {
-  const decoded = Transaction.from(rawTx);
+  const decoded = Transaction.from(rawTx)
   if (!decoded) {
-    return null;
+    return null
   }
 
   return {
@@ -27,15 +34,15 @@ const decodeTx = (rawTx: string) => {
     data: decoded.data,
     chainId: decoded.chainId,
     type: decoded.type,
-  };
-};
+  }
+}
 
 const allowedChainToSign = {
   Sepolia: 11155111,
-};
+}
 
 export const EvmTransaction = {
   signTx,
   decodeTx,
   allowedChainToSign,
-};
+}

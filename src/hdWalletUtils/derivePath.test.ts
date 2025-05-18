@@ -1,4 +1,4 @@
-import fc from 'fast-check';
+import fc from 'fast-check'
 
 import {
   changePathDict,
@@ -6,7 +6,7 @@ import {
   genBip44Path,
   purposeDict,
   typedKeys,
-} from './derivePath.js';
+} from './derivePath.js'
 
 describe('genBip44Path', () => {
   it('should generate correct BIP44 path format for random path', () => {
@@ -24,12 +24,12 @@ describe('genBip44Path', () => {
             account,
             change: changePathDict[changeKey],
             index,
-          });
+          })
 
-          const expected = `m/${purposeDict[purposeKey]}'/${coinTypeDict[coinTypeKey]}'/${account}'/${changePathDict[changeKey]}/${index}`;
-          expect(actual).toEqual(expected);
+          const expected = `m/${purposeDict[purposeKey]}'/${coinTypeDict[coinTypeKey]}'/${account}'/${changePathDict[changeKey]}/${index}`
+          expect(actual).toEqual(expected)
         },
       ),
-    );
-  });
-});
+    )
+  })
+})

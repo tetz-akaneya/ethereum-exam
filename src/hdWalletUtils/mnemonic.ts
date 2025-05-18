@@ -1,8 +1,8 @@
-import { pbkdf2Sync, randomBytes } from 'crypto';
-import { Mnemonic } from 'ethers';
+import { pbkdf2Sync, randomBytes } from 'crypto'
+import { Mnemonic } from 'ethers'
 
-import { bufferToUint8Array, uint8ArrayToHex } from '../primitive/converter.js';
-import { deriveKeyInfoFromSeed, makeSeed, Seed } from './seed.js';
+import { bufferToUint8Array, uint8ArrayToHex } from '../primitive/converter.js'
+import { deriveKeyInfoFromSeed, makeSeed, Seed } from './seed.js'
 
 /*
  * mnemonic を作る。entropyは32byteが推奨。
@@ -10,14 +10,14 @@ import { deriveKeyInfoFromSeed, makeSeed, Seed } from './seed.js';
  */
 export const createMnemonic = (arg: { byteSize: number }) => {
   if (arg.byteSize < 31) {
-    throw new Error('insecure byte size');
+    throw new Error('insecure byte size')
   }
 
-  const entropy = randomBytes(arg.byteSize);
-  const mnemonic = Mnemonic.fromEntropy(entropy);
+  const entropy = randomBytes(arg.byteSize)
+  const mnemonic = Mnemonic.fromEntropy(entropy)
 
-  return mnemonic.phrase;
-};
+  return mnemonic.phrase
+}
 
 /**
  * ニーモニックからBIP-39準拠のシードを生成する
@@ -26,8 +26,8 @@ export const createMnemonic = (arg: { byteSize: number }) => {
  * @returns 64バイトのシード（Uint8Array）
  */
 export const toSeed = (mnemonic: string, passphrase: string = ''): Seed => {
-  const normalizedMnemonic = normalizeNfkd(mnemonic);
-  const normalizedSalt = 'mnemonic' + normalizeNfkd(passphrase);
+  const normalizedMnemonic = normalizeNfkd(mnemonic)
+  const normalizedSalt = 'mnemonic' + normalizeNfkd(passphrase)
 
   const seed = pbkdf2Sync(
     Buffer.from(normalizedMnemonic, 'utf8'),
@@ -35,36 +35,36 @@ export const toSeed = (mnemonic: string, passphrase: string = ''): Seed => {
     2048,
     64,
     'sha512',
-  );
+  )
 
-  return makeSeed(bufferToUint8Array(seed));
-};
+  return makeSeed(bufferToUint8Array(seed))
+}
 
 /*
  * ニーモニック、パスフレーズからHDウォレットができるので、任意のpathのアドレスを導出する。
  */
 export const deriveKeyInfoFromMnemonic = (arg: {
-  mnemonic: string;
-  passphrase: string;
-  path: string;
+  mnemonic: string
+  passphrase: string
+  path: string
 }) => {
-  const seed = toSeed(arg.mnemonic, arg.passphrase);
+  const seed = toSeed(arg.mnemonic, arg.passphrase)
 
   const keyInfo = deriveKeyInfoFromSeed({
     seed,
     passphrase: arg.passphrase,
     path: arg.path,
-  });
+  })
 
   return {
     publicKey: uint8ArrayToHex(keyInfo.publicKey, true),
     privKey: uint8ArrayToHex(keyInfo.privKey, true),
-  };
-};
+  }
+}
 
 /**
  * UTF-8 NFKD 正規化を行う
  */
 const normalizeNfkd = (str: string): string => {
-  return str.normalize('NFKD');
-};
+  return str.normalize('NFKD')
+}

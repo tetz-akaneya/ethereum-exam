@@ -1,1 +1,1 @@
-export const iife = <T>(cb: () => T) => cb();
+export const iife = <T>(cb: () => T) => cb()
