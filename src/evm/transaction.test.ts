@@ -1,8 +1,8 @@
 import { parseEther, parseUnits, TransactionRequest } from 'ethers'
 
-import { EvmTransaction } from './transaction'
 import { makePrivateKey } from '../hdWalletUtils/privateKey'
 import { hexToUint8Array } from '../primitive/converter'
+import { EvmTransaction } from './transaction'
 
 // トランザクションデータ（オンライン側から取得し、オフラインに持ち込む）
 const testTxData: TransactionRequest = {
@@ -23,8 +23,11 @@ const testTxData: TransactionRequest = {
   type: 2,
 }
 
-const testPrivKey =
-  makePrivateKey(hexToUint8Array('0xebce77fe4c7df7c3795e6a51b37d5d6ebf21c844d0ed4da8861b0fa7f48f0d1a'))
+const testPrivKey = makePrivateKey(
+  hexToUint8Array(
+    '0xebce77fe4c7df7c3795e6a51b37d5d6ebf21c844d0ed4da8861b0fa7f48f0d1a',
+  ),
+)
 
 test('signs without error', async () => {
   const signedTx = await EvmTransaction.signTx({
